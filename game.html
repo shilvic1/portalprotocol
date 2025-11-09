@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+	<body>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Portal Protocol</title>
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+		<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap" rel="stylesheet" />
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background-color: #000;
+				font-family: "Press Start 2P", cursive;
+			}
+
+			canvas {
+				display: block;
+				background: #111;
+				margin: 0 auto;
+			}
+
+			/* Simple button with glow effect */
+			button {
+				background-color: #3498db;
+				color: white;
+				padding: 10px 20px;
+				border-radius: 5px;
+				border: none;
+				cursor: pointer;
+				transition: all 0.3s ease-in-out;
+			}
+
+			button:hover {
+				background-color: #2980b9;
+				box-shadow: 0 0 10px rgba(52, 152, 219, 0.8);
+				transform: scale(1.05);
+				transform: scale(1.1);
+			}
+
+			#skipButton {
+				position: absolute;
+				bottom: 20px;
+				right: 20px;
+				background: red;
+				color: white;
+				padding: 15px 25px;
+				font-size: 18px;
+				cursor: pointer;
+				z-index: 10;
+				border: none;
+				border-radius: 5px;
+				font-family: "Press Start 2P", cursive;
+			}
+
+			#skipButton i {
+				margin-right: 10px;
+			}
+
+			#pauseMenu {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				background-color: rgba(0, 0, 0, 0.8);
+				color: white;
+				padding: 20px;
+				border-radius: 10px;
+				display: none;
+				z-index: 50;
+			}
+
+			#pauseMenu h2 {
+				margin-top: 0;
+			}
+
+			#pauseMenu button {
+				background-color: #28a745;
+				color: white;
+				padding: 10px 20px;
+				border: none;
+				cursor: pointer;
+				margin-top: 20px;
+				border-radius: 5px;
+				font-family: "Press Start 2P", cursive;
+			}
+
+			#pauseMenu button:hover {
+				background-color: #218838;
+			}
+
+			#rightClickMenu {
+				position: absolute;
+				background-color: #333;
+				color: white;
+				padding: 10px;
+				border-radius: 5px;
+				display: none;
+				z-index: 20;
+			}
+
+			#rightClickMenu li {
+				padding: 5px;
+				cursor: pointer;
+			}
+
+			#rightClickMenu li:hover {
+				background-color: #555;
+			}
+
+			#pauseMenu {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				background-color: rgba(0, 0, 0, 0.8);
+				color: white;
+				padding: 20px;
+				border-radius: 10px;
+				display: none;
+				z-index: 50;
+				width: 300px;
+				/* Adjust width if necessary */
+			}
+
+			#pauseMenu h2 {
+				margin-top: 0;
+				font-size: 24px;
+				text-align: center;
+			}
+
+			.form-group {
+				margin: 10px 0;
+				text-align: center;
+			}
+
+			#pauseMenu button {
+				background-color: #28a745;
+				color: white;
+				padding: 10px 20px;
+				border: none;
+				cursor: pointer;
+				border-radius: 5px;
+				width: 100%;
+				font-family: "Press Start 2P", cursive;
+				font-size: 16px;
+			}
+
+			#pauseMenu button:hover {
+				background-color: #218838;
+			}
+
+			#pauseMenu button:focus {
+				outline: none;
+			}
+
+			#settingsMenu {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				background-color: rgba(0, 0, 0, 0.8);
+				color: white;
+				padding: 20px;
+				border-radius: 10px;
+				display: none;
+				z-index: 30;
+			}
+
+			#settingsMenu h2 {
+				margin-top: 0;
+			}
+
+			#settingsMenu label {
+				display: block;
+				margin: 10px 0 5px;
+			}
+
+			#settingsMenu input[type="radio"],
+			#settingsMenu input[type="text"] {
+				margin-right: 10px;
+			}
+
+			#settingsMenu button {
+				background-color: #28a745;
+				color: white;
+				padding: 10px 20px;
+				border: none;
+				cursor: pointer;
+				margin-top: 20px;
+				border-radius: 5px;
+				font-family: "Press Start 2P", cursive;
+			}
+
+			#settingsMenu button:hover {
+				background-color: #218838;
+			}
+
+			#settingsIcon {
+				position: absolute;
+				top: 20px;
+				right: 20px;
+				background-color: transparent;
+				color: white;
+				font-size: 30px;
+				cursor: pointer;
+				z-index: 100;
+				border: none;
+			}
+
+			#hotbar {
+				position: fixed;
+				bottom: 20px;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				background: rgba(0, 0, 0, 0.8);
+				padding: 10px;
+				border-radius: 10px;
+				gap: 8px;
+				/* Adds space between items */
+				transition: opacity 0.3s ease;
+				/* Smooth fade-in/fade-out */
+			}
+
+			.hotbar-item {
+				width: 50px;
+				height: 50px;
+				border: 2px solid white;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 12px;
+				color: white;
+				background: rgba(255, 255, 255, 0.05);
+				cursor: pointer;
+				transition: 0.2s;
+				overflow: hidden;
+				position: relative;
+			}
+
+			.hotbar-item img {
+				max-width: 40px;
+				max-height: 40px;
+				display: block;
+			}
+
+			.hotbar-item .label {
+				font-size: 10px;
+				text-align: center;
+				padding: 2px;
+			}
+
+			.hotbar-item.active {
+				border-color: cyan;
+				background: rgba(0, 255, 255, 0.15);
+			}
+
+			/* Mobile Control Buttons */
+			#mobileControls {
+				position: fixed;
+				bottom: 20px;
+				left: 50%;
+				transform: translateX(-50%);
+				display: flex;
+				gap: 20px;
+				justify-content: center;
+			}
+
+			.mobileButton {
+				background-color: #28a745;
+				color: white;
+				padding: 15px;
+				border: none;
+				border-radius: 5px;
+				font-family: "Press Start 2P", cursive;
+				font-size: 16px;
+				cursor: pointer;
+				width: 80px;
+			}
+
+			.mobileButton:active {
+				background-color: #218838;
+			}
+
+			#pauseMenu {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				background-color: rgba(0, 0, 0, 0.8);
+				color: white;
+				padding: 20px;
+				border-radius: 10px;
+				display: none;
+				z-index: 50;
+				width: 300px;
+			}
+
+			#settingsMenu {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				background-color: rgba(0, 0, 0, 0.8);
+				color: white;
+				padding: 20px;
+				border-radius: 10px;
+				display: none;
+				z-index: 60;
+				/* Settings menu should be above pause menu */
+				width: 300px;
+			}
+
+			#settingsMenu h2 {
+				margin-top: 0;
+			}
+
+			#pauseMenu button,
+			#settingsMenu button {
+				background-color: #28a745;
+				color: white;
+				padding: 10px 20px;
+				border: none;
+				cursor: pointer;
+				margin-top: 20px;
+				border-radius: 5px;
+				font-family: "Press Start 2P", cursive;
+			}
+
+			#pauseMenu button:hover,
+			#settingsMenu button:hover {
+				background-color: #218838;
+			}
+
+			#settingsMenu input[type="text"] {
+				margin-bottom: 10px;
+			}
+
+			#chest {
+				position: fixed;
+				right: 305px;
+				/* Adjust X position */
+				bottom: 18px;
+				/* Adjust based on floor height */
+				width: 150px;
+				/* Increased size */
+				height: 150px;
+			}
+
+			#interact-text {
+				font-size: 16px;
+				background: rgba(0, 0, 0, 0.7);
+				padding: 5px;
+				border-radius: 5px;
+			}
+
+			/* Inventory Container */
+			#inventory {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				width: 400px;
+				background: rgba(0, 0, 0, 0.9);
+				padding: 15px;
+				border-radius: 10px;
+				text-align: center;
+				color: white;
+				display: none;
+				/* Hidden by default */
+				border: 2px solid cyan;
+			}
+
+			/* Inventory Grid */
+			#inventory-grid {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 10px;
+				margin-top: 10px;
+			}
+
+			/* Inventory Slots */
+			.inventory-slot {
+				width: 60px;
+				height: 60px;
+				border: 2px solid white;
+				background: rgba(255, 255, 255, 0.1);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 20px;
+				transition: 0.2s;
+			}
+
+			.inventory-slot:hover {
+				border-color: cyan;
+			}
+
+			/* Show/Hide Inventory */
+			.hidden {
+				display: none;
+			}
+
+			/* Chest UI Container */
+			#chestUI {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				background-color: rgba(0, 0, 0, 0.8);
+				padding: 20px;
+				border-radius: 10px;
+				display: none;
+				/* Hidden by default */
+				width: 400px;
+				height: 300px;
+				color: white;
+				box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+				overflow-y: auto;
+			}
+
+			/* Chest Items Container */
+			#chestUI .item-container {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-around;
+			}
+
+			/* Individual Chest Item */
+			#chestUI .chest-item {
+				width: 80px;
+				height: 80px;
+				margin: 10px;
+				background-color: #333;
+				color: white;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				border-radius: 5px;
+				transition: background-color 0.3s ease;
+				text-align: center;
+				padding: 4px;
+				box-sizing: border-box;
+			}
+
+			#chestUI .chest-item img {
+				max-width: 100%;
+				max-height: 100%;
+				display: block;
+			}
+
+			#chestUI .chest-item:hover {
+				background-color: #ff6f61;
+				/* Highlight when hovered */
+			}
+
+			/* Close Button */
+			#closeChestButton {
+				position: absolute;
+				top: 10px;
+				right: 10px;
+				background-color: red;
+				color: white;
+				border: none;
+				padding: 10px;
+				border-radius: 5px;
+				cursor: pointer;
+			}
+
+			#closeChestButton:hover {
+				background-color: darkred;
+			}
+		</style>
+		<button id="skipButton">
+			<i class="fas fa-forward"></i> Skip Cutscene </button>
+		<canvas id="gameCanvas" width="664" height="492"></canvas>
+		<!-- Chest UI -->
+		<div id="chestUI" style="
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 300px;
+        text-align: center;
+      ">
+			<h3>Chest</h3>
+			<div style="display: grid; grid-template-columns: repeat(3, 60px); gap: 10px">
+				<button class="chest-item">
+					<div class="item-content">
+						Gun
+						<img src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/4e707c54-a28f-454b-852f-ae825ca9f20f.image.png?v=1743862665001" alt="Gun" />
+					</div>
+				</button>
+				<button class="chest-item"><div class="item-content">Medkit</div></button>
+				<button class="chest-item"></button>
+				<button class="chest-item"></button>
+				<button class="chest-item"></button>
+				<button class="chest-item"></button>
+			</div>
+			<button id="closeChestButton" style="
+          margin-top: 10px;
+          padding: 10px 20px;
+          background-color: #28a745;
+          color: white;
+          border: none;
+          cursor: pointer;
+          border-radius: 5px;
+        "> Close </button>
+		</div>
+		<!-- chest and door are hidden during cutscene; will be shown after cutscene completes -->
+		<img id="chest" src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/metal%20chest.png?v=1742944087746" alt="Metal Chest" style="display:none" />
+		<p id="interact-text" style="
+        display: none;
+        position: absolute;
+        left: 320px;
+        bottom: 160px;
+        color: white;
+      "> Press E to Interact </p>
+		<img id="door" src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/metal%20door.png?v=1741449268513" alt="Door" style="display:none; position: fixed; right: 500px; bottom: 18px; width: 150px; height: 150px;" />
+		<p id="door-interact-text" style="
+        display: none;
+        position: absolute;
+        left: 400px;
+        bottom: 160px;
+        color: #fff;
+      "> Press E to Enter </p>
+		<!-- Mobile Control Buttons -->
+		<div id="mobileControls" style="display: none">
+			<button id="moveLeft" class="mobileButton">Left</button>
+			<button id="moveRight" class="mobileButton">Right</button>
+			<button id="jump" class="mobileButton">Jump</button>
+		</div>
+		<div id="pauseMenu">
+			<h2>Game Paused</h2>
+			<div class="form-group">
+				<button id="resumeButton">Resume</button>
+			</div>
+			<div class="form-group">
+				<button id="restartButton">Restart Game</button>
+			</div>
+			<div class="form-group">
+				<button id="exitButton">Exit to Main Menu</button>
+			</div>
+			<div class="form-group">
+				<button id="settingsButton">Settings</button>
+				<!-- Button to open settings -->
+			</div>
+		</div>
+		<!-- Settings Menu (on top of Pause Menu) -->
+		<div id="settingsMenu" style="display: none">
+			<h2>Settings</h2>
+			<!-- Hotbar Toggle -->
+			<div class="form-group">
+				<label for="hotbarToggle">Show Hotbar:</label>
+				<input type="checkbox" id="hotbarToggle" checked />
+			</div>
+			<!-- Volume Control -->
+			<div class="form-group">
+				<label for="volumeControl">Background Music Volume:</label>
+				<input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1" />
+				<span id="volumeLabel">100%</span>
+			</div>
+			<!-- Save Cutscene Progress -->
+			<div class="form-group">
+				<label for="saveCutsceneProgress">Save Cutscene Progress:</label>
+				<input type="checkbox" id="saveCutsceneProgress" checked />
+			</div>
+			<!-- Keybinds for Movement -->
+			<div class="form-group">
+				<label for="moveUpKey">Move Up Key:</label>
+				<button id="moveUpKey" class="key-button">ArrowUp</button>
+			</div>
+			<div class="form-group">
+				<label for="moveDownKey">Move Down Key:</label>
+				<button id="moveDownKey" class="key-button">ArrowDown</button>
+			</div>
+			<div class="form-group">
+				<label for="moveLeftKey">Move Left Key:</label>
+				<button id="moveLeftKey" class="key-button">ArrowLeft</button>
+			</div>
+			<div class="form-group">
+				<label for="moveRightKey">Move Right Key:</label>
+				<button id="moveRightKey" class="key-button">ArrowRight</button>
+			</div>
+			<div class="form-group">
+				<label for="shootKey">Shoot Key:</label>
+				<button id="shootKey" class="key-button">Space</button>
+			</div>
+			<!-- Save Button -->
+			<button id="saveSettings">Save Settings</button>
+			<button id="closeSettingsButton">Close Settings</button>
+		</div>
+		<ul id="rightClickMenu" style="display: none; left: 400px; top: 287px">
+			<li id="menuRestart">Restart Game</li>
+			<li id="menuToggleSound">Toggle Sound</li>
+			<li id="menuSaveGame">Save Game</li>
+			<li id="menuToggleFullscreen">Toggle Fullscreen</li>
+			<li id="menuSettings">Settings</li>
+			<li id="menuToggleSFX">Toggle SFX</li>
+		</ul>
+		<div id="hotbar" style="display:none">
+			<div class="hotbar-item" data-slot="1" data-item=""></div>
+			<div class="hotbar-item" data-slot="2" data-item=""></div>
+			<div class="hotbar-item" data-slot="3" data-item=""></div>
+			<div class="hotbar-item" data-slot="4" data-item=""></div>
+			<div class="hotbar-item" data-slot="5" data-item=""></div>
+			<div class="hotbar-item" data-slot="6" data-item=""></div>
+			<div class="hotbar-item" data-slot="7" data-item=""></div>
+			<div class="hotbar-item" data-slot="8" data-item=""></div>
+		</div>
+		<button id="settingsIcon">
+			<i class=""></i>
+		</button>
+		<script>
+			const canvas = document.getElementById("gameCanvas");
+			const ctx = canvas.getContext("2d");
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+
+			const player = {
+				x: canvas.width / 2,
+				y: canvas.height / 2 - 50,
+				width: 50,
+				height: 50,
+				speed: 5,
+				dx: 0,
+				dy: 0,
+				color: "cyan",
+				gravity: 0.5,
+				jumpStrength: -10,
+				isJumping: false,
+				onGround: false,
+				// new health + stamina
+				health: 100,
+				maxHealth: 100,
+				stamina: 100,
+				maxStamina: 100,
+				// equipped item (if any)
+				equipped: null
+			};
+
+			// Updated cutscene messages
+			const cutsceneMessages = ["Initializing Scan...", "New Id Detected- rift_Techinican_0_167.", "Welcome, KAI WALKER", "Welcome to Drt Inc, Dimensional Rift Technologies Inc.", "You are the newest Rift Technician!", "Your job is monitor, maintain and stabilize Rifts to prevent dimensional collapse.", "Do you think you can complete the portal protocol?", ];
+			const platform = {
+				x: 0,
+				y: canvas.height - 50,
+				width: canvas.width,
+				height: 50,
+				color: "grey",
+			};
+
+			let currentMessageIndex = 0;
+			let currentLineIndex = 0;
+			let isCutsceneComplete = false;
+			let isTyping = false;
+			let currentText = "";
+			let gameSound = true;
+			let gamePaused = false; // Track if the game is paused
+			let gameLoopRunning = false; // Track if the game loop is running
+			let sfxEnabled = true; // Flag to track SFX status (on by default)
+			let keys = {
+				up: false,
+				down: false,
+				left: false,
+				right: false,
+				space: false,
+				shift: false,
+				enter: false,
+			};
+
+			// Stamina system settings
+			const staminaConfig = {
+				regenRate: 18,      // stamina per second
+				drainRate: 40,     // stamina per second while sprinting
+				regenDelay: 1.0    // seconds after sprint before regen starts
+			};
+			let staminaRegenTimer = 0;
+
+			const chestUI = document.getElementById("chestUI");
+			const interactText = document.getElementById("interact-text");
+			const chest = document.getElementById("chest");
+			const closeChestButton = document.getElementById("closeChestButton");
+			const door = document.getElementById("door");
+			const doorInteractText = document.getElementById("door-interact-text");
+			const hotbar = document.getElementById("hotbar");
+			const hotbarToggle = document.getElementById("hotbarToggle"); // Get the hotbar toggle checkbox
+			const hotbarItems = document.querySelectorAll(".hotbar-item");
+
+			// --- Particle system ---
+			const particles = [];
+			const particleConfig = {
+				gravity: 0.35,
+				jumpCount: 12,
+				jumpSpeed: 2.5,
+				jumpSpread: 1.6,
+				jumpLife: 40,
+				sprintSpawnRate: 2, // legacy per-frame value; scaled by dt in loop
+				sprintLife: 30,
+				sprintSpeed: 2,
+				sprintSpread: 1.2
+			};
+			// create a particle object
+			function createParticle(x, y, vx, vy, size, color, life) {
+				return { x, y, vx, vy, size, color, life, maxLife: life };
+			}
+			// spawn particles for jump
+			function spawnJumpParticles() {
+				// spawn a burst around player's feet
+				const px = player.x + player.width / 2;
+				const py = player.y + player.height;
+				for (let i = 0; i < particleConfig.jumpCount; i++) {
+					const angle = (Math.random() * Math.PI) - Math.PI / 2; // upward distribution
+					const speed = (Math.random() * particleConfig.jumpSpeed) + 0.5;
+					const vx = Math.cos(angle) * speed * (Math.random() * particleConfig.jumpSpread);
+					const vy = Math.sin(angle) * speed * (Math.random() * particleConfig.jumpSpread) - 1.5;
+					const size = 2 + Math.random() * 3;
+					const color = `rgba(180, 255, 255, ${0.8 + Math.random()*0.2})`;
+					const life = particleConfig.jumpLife + Math.round(Math.random() * 10);
+					particles.push(createParticle(px, py, vx, vy, size, color, life));
+				}
+			}
+			// spawn sprint particles (continuous)
+			let sprintParticleAccumulator = 0;
+			function spawnSprintParticle() {
+				const px = player.x + player.width / 2;
+				const py = player.y + player.height - 6;
+				const dir = (keys.left && !keys.right) ? -1 : (keys.right && !keys.left) ? 1 : 0;
+				// emit slightly behind player based on movement direction
+				const offsetX = -dir * (player.width / 2);
+				const vx = (-dir * 0.2) + (Math.random() - 0.5) * particleConfig.sprintSpread;
+				const vy = -(Math.random() * 0.6);
+				const size = 1 + Math.random() * 2;
+				const color = `rgba(150, 220, 255, ${0.5 + Math.random()*0.3})`;
+				const life = particleConfig.sprintLife + Math.round(Math.random() * 10);
+				particles.push(createParticle(px + offsetX, py, vx * particleConfig.sprintSpeed, vy, size, color, life));
+			}
+			function updateAndDrawParticles(dt) {
+				// update
+				for (let i = particles.length - 1; i >= 0; i--) {
+					const p = particles[i];
+					p.vy += particleConfig.gravity * 0.12; // subtle gravity
+					p.x += p.vx;
+					p.y += p.vy;
+					p.life--;
+					if (p.life <= 0) particles.splice(i, 1);
+				}
+				// draw
+				for (let i = 0; i < particles.length; i++) {
+					const p = particles[i];
+					const alpha = Math.max(0, p.life / p.maxLife);
+					const c = p.color.replace(/rgba\(([^,]+),([^,]+),([^,]+),([^)]+)\)/, (m, r, g, b) => `rgba(${r},${g},${b},${alpha.toFixed(2)})`);
+					ctx.fillStyle = c;
+					ctx.beginPath();
+					ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+					ctx.fill();
+				}
+			}
+			// --- end particle system ---
+
+			// Helper functions to show/hide world UI (chest, door, hotbar) based on cutscene state
+			function showWorldUI() {
+				if (chest) chest.style.display = "block";
+				if (door) door.style.display = "block";
+				// only show hotbar if toggle is checked
+				if (hotbar) hotbar.style.display = hotbarToggle && hotbarToggle.checked ? "flex" : "none";
+			}
+			function hideWorldUI() {
+				if (chest) chest.style.display = "none";
+				if (door) door.style.display = "none";
+				if (hotbar) hotbar.style.display = "none";
+				// hide interact prompts too
+				if (interactText) interactText.style.display = "none";
+				if (doorInteractText) doorInteractText.style.display = "none";
+			}
+			// initially hide world UI while cutscene plays
+			hideWorldUI();
+
+			// Add item to the first available hotbar slot (icon or label)
+			function addItemToHotbar(itemName, imgSrc = null) {
+				for (let i = 0; i < hotbarItems.length; i++) {
+					const slot = hotbarItems[i];
+					if (!slot.dataset.item || slot.dataset.item === '') {
+						// clear any previous content
+						slot.innerHTML = '';
+						if (imgSrc) {
+							const img = document.createElement('img');
+							img.src = imgSrc;
+							img.alt = itemName;
+							slot.appendChild(img);
+						} else {
+							const label = document.createElement('div');
+							label.className = 'label';
+							label.textContent = itemName;
+							slot.appendChild(label);
+						}
+						slot.dataset.item = itemName;
+						slot.title = itemName;
+						// simple click behavior: use or show item name (can be replaced with actual use)
+						slot.addEventListener('click', () => {
+							// Example behavior: equip gun or use medkit later
+							if (/gun/i.test(itemName)) {
+								player.equipped = 'Gun';
+								hotbarItems.forEach(s => s.classList.remove('equipped'));
+								slot.classList.add('equipped');
+							} else if (/medkit/i.test(itemName)) {
+								// use medkit immediately for this example
+								player.health = Math.min(player.maxHealth, player.health + 40);
+								slot.innerHTML = '';
+								slot.dataset.item = '';
+								slot.title = '';
+							} else {
+								alert(`${itemName} selected from hotbar`);
+							}
+						}, { once: false });
+						updateHotbarSelection(); // refresh selection UI if needed
+						return true;
+					}
+				}
+				// no free slot
+				alert('Hotbar is full!');
+				return false;
+			}
+
+			let isHoveringChest = false;
+			// Show "Press E to Interact" when hovering over the chest
+			if (chest) {
+				chest.addEventListener("mouseenter", () => {
+					if (!isCutsceneComplete) return; // ignore interaction during cutscene
+					isHoveringChest = true;
+					interactText.style.display = "block";
+					interactText.innerText = "Press E to Open Chest";
+				});
+				// Hide "Press E to Interact" when leaving the chest area
+				chest.addEventListener("mouseleave", () => {
+					isHoveringChest = false;
+					interactText.style.display = "none";
+				});
+				// You can also use mouse click to interact with chest
+				chest.addEventListener("click", () => {
+					if (isHoveringChest && isCutsceneComplete) {
+						chestUI.style.display = "block"; // Show chest UI
+						interactText.style.display = "none"; // Hide interact text
+					}
+				});
+			}
+
+			// Open chest when player presses "E"
+			document.addEventListener("keydown", (e) => {
+				if ((e.key === "e" || e.key === "E") && isHoveringChest && isCutsceneComplete) {
+					chestUI.style.display = "block"; // Show the chest UI
+					interactText.style.display = "none"; // Hide the interact text
+				}
+			});
+			// Close the chest UI when the close button is clicked
+			if (closeChestButton) {
+				closeChestButton.addEventListener("click", () => {
+					chestUI.style.display = "none"; // Hide chest UI
+				});
+			}
+
+			// Logic for item selection inside the chest
+			const chestItems = document.querySelectorAll(".chest-item");
+			chestItems.forEach((item) => {
+				item.addEventListener("click", (e) => {
+					// find .item-content text / image
+					const content = item.querySelector('.item-content');
+					let itemName = '';
+					let imgSrc = null;
+					if (content) {
+						// text node + maybe img
+						// prefer explicit child text or label
+						const text = content.childNodes;
+						for (let n = 0; n < text.length; n++) {
+							const node = text[n];
+							if (node.nodeType === Node.TEXT_NODE) {
+								itemName = node.textContent.trim();
+								if (itemName) break;
+							}
+						}
+						const img = content.querySelector('img');
+						if (img) {
+							imgSrc = img.src;
+							// If there's no text, try alt
+							if (!itemName) itemName = img.alt || 'Item';
+						}
+					} else {
+						// fallback: use innerText of button
+						itemName = item.innerText.trim();
+					}
+
+					// If the slot is empty do nothing
+					if (!itemName && !imgSrc) return;
+
+					// Move Gun sprite to hotbar (use imgSrc) and remove from chest
+					if (/gun/i.test(itemName) && imgSrc) {
+						const success = addItemToHotbar('Gun', imgSrc);
+						if (success) {
+							// remove the visual from chest (so it disappears)
+							item.innerHTML = '';
+						}
+					} else if (/medkit/i.test(itemName)) {
+						// For medkit, add label to hotbar and remove text from chest
+						const medkitDataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+							`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="%23b91c1c"/><rect x="18" y="26" width="28" height="12" fill="%23ffffff"/><rect x="28" y="18" width="8" height="28" fill="%23ffffff"/></svg>`
+						);
+						const success = addItemToHotbar('Medkit', medkitDataUrl);
+						if (success) {
+							item.innerHTML = ''; // remove medkit text from chest UI
+						}
+					} else {
+						// Generic behavior: add text label to hotbar and clear chest slot
+						const success = addItemToHotbar(itemName || 'Item', imgSrc);
+						if (success) item.innerHTML = '';
+					}
+
+					// hide chest UI and any interact prompt
+					chestUI.style.display = 'none';
+					if (interactText) interactText.style.display = 'none';
+				});
+			});
+
+			// Door interaction (moved outside chestItems loop)
+			let isHoveringDoor = false;
+			// Show interaction prompt on hover
+			if (door) {
+				door.addEventListener("mouseenter", () => {
+					if (!isCutsceneComplete) return; // ignore interaction during cutscene
+					isHoveringDoor = true;
+					doorInteractText.style.display = "block";
+				});
+				door.addEventListener("mouseleave", () => {
+					isHoveringDoor = false;
+					doorInteractText.style.display = "none";
+				});
+			}
+			// Handle interaction via click or key press
+			function enterDoor() {
+				if (!isCutsceneComplete) return; // cannot enter during cutscene
+				if (isHoveringDoor) {
+					// Change background
+					document.body.style.backgroundImage = "url('https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/Image_20250305_180433_654.png?v=1741449517203')";
+					document.body.style.backgroundSize = "cover";
+					document.body.style.backgroundPosition = "center";
+					// If there is a player DOM element move it; otherwise it's ignored
+					const playerEl = document.getElementById("player");
+					if (playerEl) {
+						playerEl.style.left = "50%";
+						playerEl.style.top = "50%";
+						playerEl.style.transform = "translate(-50%, -50%)";
+					}
+					doorInteractText.style.display = "none";
+				}
+			}
+			if (door) door.addEventListener("click", enterDoor);
+			document.addEventListener("keydown", (e) => {
+				if ((e.key === "e" || e.key === "E") && isHoveringDoor && isCutsceneComplete) {
+					enterDoor();
+				}
+			});
+
+			const skipButton = document.getElementById("skipButton");
+			skipButton.addEventListener("click", skipCutscene);
+			const pauseMenu = document.getElementById("pauseMenu");
+			const resumeButton = document.getElementById("resumeButton");
+			const restartButton = document.getElementById("restartButton");
+			const rightClickMenu = document.getElementById("rightClickMenu");
+			const menuRestart = document.getElementById("menuRestart");
+			const menuToggleSound = document.getElementById("menuToggleSound");
+			// Sound effect URLs
+			const jumpSFX = new Audio("https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/cartoon-jump-6462%20(1).mp3?v=1743861440466");
+			const walkingSFX = new Audio("https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/loud-footsteps-62038-%5BAudioTrimmer.com%5D-%5BAudioTrimmer.com%5D.mp3?v=1743995310590");
+			const runningSFX = new Audio("https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/running-on-concrete-268478.mp3?v=1743861464620");
+
+			function jump() {
+				if (sfxEnabled) {
+					jumpSFX.play();
+				}
+				// spawn jump particles when player jumps
+				spawnJumpParticles();
+			}
+
+			function walk() {
+				if (sfxEnabled) {
+					walkingSFX.play();
+				}
+			}
+
+			function run() {
+				if (sfxEnabled) {
+					runningSFX.play();
+				}
+			}
+			// Initialize and preload sound effects
+			jumpSFX.load();
+			walkingSFX.load();
+			runningSFX.load();
+			// Open the settings menu
+			const settingsButton = document.getElementById("settingsButton");
+			const settingsMenu = document.getElementById("settingsMenu");
+			let settingsMenuOpen = false;
+			settingsButton.addEventListener("click", () => {
+				settingsMenu.style.display = "block";
+				settingsMenuOpen = true; // Settings menu is now open
+				pauseMenu.style.display = "none"; // Hide the pause menu
+			});
+			// Close the settings menu
+			const closeSettingsButton = document.getElementById("closeSettingsButton");
+			closeSettingsButton.addEventListener("click", () => {
+				settingsMenu.style.display = "none";
+				settingsMenuOpen = false; // Settings menu is now closed
+				pauseMenu.style.display = "block"; // Show the pause menu
+			});
+			// Resume the game
+			resumeButton.addEventListener("click", () => {
+				gamePaused = false;
+				pauseMenu.style.display = "none";
+				settingsMenu.style.display = "none";
+				// resume loop
+				requestAnimationFrame(gameLoop);
+			});
+			// Restart the game
+			restartButton.addEventListener("click", () => {
+				gamePaused = false;
+				pauseMenu.style.display = "none";
+				settingsMenu.style.display = "none";
+				// Add your restart logic here
+				restartGame();
+			});
+			// Toggle pause menu visibility
+			document.addEventListener("keydown", (e) => {
+				if (e.key === "Escape") {
+					if (gamePaused) {
+						if (settingsMenuOpen) {
+							settingsMenu.style.display = "none"; // Close settings if it's open
+							settingsMenuOpen = false;
+						} else {
+							pauseMenu.style.display = "none"; // Close pause menu if open
+							gamePaused = false;
+							// resume loop
+							requestAnimationFrame(gameLoop);
+						}
+					} else {
+						pauseMenu.style.display = "block"; // Open pause menu
+						gamePaused = true;
+					}
+				}
+			});
+			// Initialize the pause menu when the game is paused
+			function togglePauseMenu() {
+				if (!gamePaused) {
+					pauseMenu.style.display = "block"; // Open the pause menu
+					gamePaused = true;
+				} else {
+					pauseMenu.style.display = "none"; // Close the pause menu
+					gamePaused = false;
+					requestAnimationFrame(gameLoop);
+				}
+			}
+			canvas.addEventListener("contextmenu", (e) => {
+				e.preventDefault();
+				rightClickMenu.style.left = `${e.pageX}px`;
+				rightClickMenu.style.top = `${e.pageY}px`;
+				rightClickMenu.style.display = "block";
+			});
+			document.addEventListener("click", () => {
+				rightClickMenu.style.display = "none";
+			});
+			menuRestart.addEventListener("click", restartGame);
+			menuToggleSound.addEventListener("click", toggleSound);
+			const menuToggleSFX = document.getElementById("menuToggleSFX");
+			menuToggleSFX.addEventListener("click", toggleSFX);
+			resumeButton.addEventListener("click", resumeGame);
+			restartButton.addEventListener("click", restartGame);
+			const saveSettingsButton = document.getElementById("saveSettings");
+			const settingsIcon = document.getElementById("settingsIcon");
+			settingsIcon.addEventListener("click", toggleSettingsMenu);
+
+			// Movement input handling
+			document.addEventListener("keydown", (e) => {
+				// Movement Keys (Arrow keys and A/D keys)
+				if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+					keys.left = true;
+				}
+				if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+					keys.right = true;
+				}
+				if (e.key === "ArrowUp") keys.up = true;
+				if (e.key === "ArrowDown") keys.down = true;
+				if (e.key === " ") keys.space = true;
+				if (e.key === "Shift") keys.shift = true;
+				// Pause Menu Logic (Escape key to pause)
+				if (e.key === "Escape" && !gamePaused) {
+					togglePauseMenu();
+				}
+			});
+			document.addEventListener("keydown", function(e) {
+				if (e.code === "Space") {
+					jump(); // Trigger jump sound when spacebar is pressed
+				}
+				if (e.code === "ArrowRight" || e.code === "ArrowLeft") {
+					walk(); // Trigger walking sound when arrow keys are pressed
+				}
+				if ((e.code === "ArrowRight" || e.code === "ArrowLeft") && e.shiftKey) {
+					run(); // Trigger running sound when arrow keys + shift are pressed
+				}
+			});
+			document.addEventListener("keyup", (e) => {
+				// Stop movement when keys are released
+				if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+					keys.left = false;
+				}
+				if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+					keys.right = false;
+				}
+				if (e.key === "ArrowUp") keys.up = false;
+				if (e.key === "ArrowDown") keys.down = false;
+				if (e.key === " ") keys.space = false;
+				if (e.key === "Shift") keys.shift = false;
+			});
+
+			function toggleSettingsMenu() {
+				settingsMenu.style.display = settingsMenu.style.display === "block" ? "none" : "block";
+			}
+
+			// Detect mouse position
+			document.addEventListener("mousemove", (e) => {
+				const cursorPosition = e.clientY; // Get vertical position of the mouse cursor
+				// If the mouse is within 50px from the bottom of the screen, fade in the hotbar
+				if (cursorPosition > window.innerHeight - 50) {
+					hotbar.style.opacity = 1; // Fade in
+				} else {
+					hotbar.style.opacity = 0; // Fade out
+				}
+			});
+			// Event listener to toggle hotbar visibility
+			hotbarToggle.addEventListener("change", () => {
+				if (hotbarToggle.checked) {
+					hotbar.style.display = "flex"; // Show the hotbar
+				} else {
+					hotbar.style.display = "none"; // Hide the hotbar
+				}
+			});
+			// Initial check to set the hotbar visibility based on the checkbox's state
+			if (hotbarToggle.checked) {
+				hotbar.style.display = "flex";
+			} else {
+				hotbar.style.display = "none";
+			}
+
+			function saveSettings() {
+				// Note: original saveSettingsDid other things; be careful if you depend on elements not present
+				// Keep this minimal here
+				localStorage.setItem("volume", backgroundMusicVolume);
+				localStorage.setItem("saveCutsceneProgress", saveCutsceneProgress);
+				alert("Settings saved!");
+			}
+
+			function typeText(text, index = 0) {
+				if (index < text.length) {
+					currentText += text.charAt(index);
+					index++;
+					setTimeout(() => {
+						typeText(text, index);
+					}, 100); // Adjust typing speed if necessary
+				}
+			}
+			const baseSpeed = 5;
+			const speedBoost = 7;
+
+			// draw HUD: health and stamina bars
+			function drawHUD() {
+				const padding = 16;
+				const barW = 220;
+				const barH = 14;
+				// Health
+				const hx = padding;
+				const hy = padding;
+				ctx.save();
+				// background
+				ctx.fillStyle = "rgba(0,0,0,0.6)";
+				ctx.fillRect(hx - 2, hy - 2, barW + 4, barH + 4);
+				// border
+				ctx.strokeStyle = "white";
+				ctx.lineWidth = 2;
+				ctx.strokeRect(hx - 2, hy - 2, barW + 4, barH + 4);
+				// empty bar
+				ctx.fillStyle = "#550000";
+				ctx.fillRect(hx, hy, barW, barH);
+				// health fill
+				const healthRatio = Math.max(0, Math.min(1, player.health / player.maxHealth));
+				ctx.fillStyle = "#ff4444";
+				ctx.fillRect(hx, hy, barW * healthRatio, barH);
+				// text
+				ctx.fillStyle = "white";
+				ctx.font = "12px monospace";
+				ctx.fillText(`HP: ${Math.round(player.health)}/${player.maxHealth}`, hx + 6, hy + barH - 2);
+
+				// Stamina (below health)
+				const sx = padding;
+				const sy = hy + barH + 10;
+				ctx.fillStyle = "rgba(0,0,0,0.6)";
+				ctx.fillRect(sx - 2, sy - 2, barW + 4, barH + 4);
+				ctx.strokeStyle = "white";
+				ctx.lineWidth = 2;
+				ctx.strokeRect(sx - 2, sy - 2, barW + 4, barH + 4);
+				ctx.fillStyle = "#222233";
+				ctx.fillRect(sx, sy, barW, barH);
+				const stamRatio = Math.max(0, Math.min(1, player.stamina / player.maxStamina));
+				ctx.fillStyle = "#66ddff";
+				ctx.fillRect(sx, sy, barW * stamRatio, barH);
+				ctx.fillStyle = "white";
+				ctx.font = "12px monospace";
+				ctx.fillText(`STA: ${Math.round(player.stamina)}/${player.maxStamina}`, sx + 6, sy + barH - 2);
+				ctx.restore();
+			}
+
+			// gameLoop now uses timestamp for delta time (dt) to handle stamina regen/drain reliably
+			let lastTimestamp = null;
+
+			function gameLoop(timestamp) {
+				if (gamePaused) {
+					lastTimestamp = timestamp || performance.now();
+					return;
+				}
+				if (!lastTimestamp) lastTimestamp = timestamp;
+				const dt = Math.min(0.05, ((timestamp || performance.now()) - lastTimestamp) / 1000); // clamp dt
+				lastTimestamp = timestamp || performance.now();
+
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				if (isCutsceneComplete) {
+					// Draw the grey floor after the cutscene
+					ctx.fillStyle = platform.color;
+					ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+				}
+				if (!isCutsceneComplete) {
+					if (currentMessageIndex < cutsceneMessages.length) {
+						const message = cutsceneMessages[currentMessageIndex];
+						const lines = message.split("\n");
+						if (currentLineIndex < lines.length) {
+							if (keys.space) {
+								currentLineIndex++;
+								currentText = lines.slice(0, currentLineIndex).join("\n");
+							} else if (!isTyping) {
+								isTyping = true;
+								currentText = "";
+								typeText(lines[currentLineIndex]);
+							}
+						} else {
+							currentMessageIndex++;
+							currentLineIndex = 0;
+						}
+						ctx.fillStyle = "white";
+						ctx.font = "30px Arial";
+						ctx.fillText(currentText, 50, canvas.height - 50);
+					} else {
+						isCutsceneComplete = true;
+						skipButton.style.display = "none";
+						// show world UI now that cutscene is over
+						showWorldUI();
+					}
+				} else {
+					// Movement and physics - uses dt
+					player.speed = (keys.shift && player.stamina > 0 && (keys.left || keys.right)) ? speedBoost : baseSpeed;
+					// apply movement
+					if (keys.left) player.dx = -player.speed;
+					else if (keys.right) player.dx = player.speed;
+					else player.dx = 0;
+					// vertical physics
+					player.dy += player.gravity;
+					if (keys.space && !player.isJumping && player.onGround) {
+						player.dy = player.jumpStrength;
+						player.isJumping = true;
+						player.onGround = false;
+						// spawn particles
+						spawnJumpParticles();
+					}
+
+					// stamina drain while sprinting
+					const isSprinting = keys.shift && (keys.left || keys.right) && player.stamina > 0;
+					if (isSprinting) {
+						// drain stamina
+						player.stamina = Math.max(0, player.stamina - staminaConfig.drainRate * dt);
+						// reset regen timer
+						staminaRegenTimer = staminaConfig.regenDelay;
+						// sprint particle spawn scaled to dt
+						sprintParticleAccumulator += particleConfig.sprintSpawnRate * (dt * 60);
+						while (sprintParticleAccumulator >= 1) {
+							spawnSprintParticle();
+							sprintParticleAccumulator -= 1;
+						}
+					} else {
+						// not sprinting: reduce regen timer then regen
+						if (staminaRegenTimer > 0) {
+							staminaRegenTimer -= dt;
+						} else {
+							player.stamina = Math.min(player.maxStamina, player.stamina + staminaConfig.regenRate * dt);
+						}
+						sprintParticleAccumulator = 0;
+					}
+
+					player.x += player.dx;
+					player.y += player.dy;
+					if (player.y + player.height > platform.y) {
+						player.y = platform.y - player.height;
+						player.dy = 0;
+						player.isJumping = false;
+						player.onGround = true;
+					}
+					if (player.x < 0) player.x = 0;
+					if (player.y < 0) player.y = 0;
+					if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+					if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+				}
+
+				// update and draw particles (do this before drawing player so particles appear behind player)
+				updateAndDrawParticles(dt);
+
+				// draw player
+				drawPlayer();
+
+				// draw HUD (health + stamina)
+				drawHUD();
+
+				requestAnimationFrame(gameLoop);
+			}
+
+			function playerMovementLogic() {
+				// kept for compatibility but main movement handled in gameLoop now
+			}
+
+			function drawPlayer() {
+				ctx.fillStyle = player.color;
+				ctx.fillRect(player.x, player.y, player.width, player.height);
+			}
+
+			function skipCutscene() {
+				isCutsceneComplete = true;
+				currentMessageIndex = cutsceneMessages.length;
+				skipButton.style.display = "none";
+				showWorldUI();
+			}
+
+			function restartGame() {
+				isCutsceneComplete = false;
+				currentMessageIndex = 0;
+				currentText = "";
+				currentLineIndex = 0;
+				player.x = canvas.width / 2;
+				player.y = canvas.height / 2;
+				player.dy = 0;
+				player.isJumping = false;
+				player.onGround = false;
+				gameSound = true;
+				rightClickMenu.style.display = "none";
+				skipButton.style.display = "block";
+				// hide world UI again while cutscene restarts
+				hideWorldUI();
+				// clear hotbar contents on restart (optional)
+				hotbarItems.forEach(slot => {
+					slot.innerHTML = '';
+					slot.dataset.item = '';
+					slot.title = '';
+				});
+				// clear particles
+				particles.length = 0;
+				// reset player stats
+				player.health = player.maxHealth;
+				player.stamina = player.maxStamina;
+				// kick off loop
+				requestAnimationFrame(gameLoop);
+			}
+
+			function toggleSound() {
+				gameSound = !gameSound;
+				rightClickMenu.style.display = "none";
+				alert(`Sound is ${gameSound ? "On" : "Off"}`);
+			}
+
+			function playSoundOnce(audio) {
+				audio.pause(); // Stop current sound if any
+				audio.currentTime = 0; // Reset to the beginning of the sound
+				audio.play(); // Play the sound
+			}
+
+			// Set up event listeners for key presses
+			document.addEventListener("keydown", function(e) {
+				// Debug log for checking which key was pressed
+				// Jump - Spacebar
+				if (e.code === "Space") {
+					jump(); // Trigger jump sound and particles
+				}
+				// Walking - Left or Right Arrow keys
+				if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
+					playSoundOnce(walkingSFX); // Trigger walking sound
+				}
+				// Running - Left/Right Arrow + Shift
+				if ((e.code === "ArrowLeft" || e.code === "ArrowRight") && e.shiftKey) {
+					playSoundOnce(runningSFX); // Trigger running sound
+				}
+				// Walking - Left or Right Arrow keys (A/D)
+				if (e.code === "A" || e.code === "D") {
+					playSoundOnce(walkingSFX); // Trigger walking sound
+				}
+				// Running - Left/Right Arrow + Shift (A/D + Shift)
+				if ((e.code === "A" || e.code === "D") && e.shiftKey) {
+					playSoundOnce(runningSFX); // Trigger running sound
+				}
+			});
+			let backgroundMusic = new Audio("https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/Galactic%20Glow-2.mp3?v=1741567498167");
+			backgroundMusic.loop = false;
+			backgroundMusic.play();
+
+			function togglePauseMenu() {
+				gamePaused = !gamePaused;
+				if (gamePaused) {
+					pauseMenu.style.display = "block";
+				} else {
+					pauseMenu.style.display = "none";
+					requestAnimationFrame(gameLoop); // resume
+				}
+			}
+
+			function toggleSound() {
+				gameSound = !gameSound;
+				if (gameSound) {
+					backgroundMusic.play();
+				} else {
+					backgroundMusic.pause();
+				}
+				alert(`Sound is ${gameSound ? "On" : "Off"}`);
+			}
+
+			function toggleSFX() {
+				sfxEnabled = !sfxEnabled; // Toggle the SFX status
+				rightClickMenu.style.display = "none"; // Hide the right-click menu after toggling
+				if (sfxEnabled) {
+					alert("Sound effects are On");
+				} else {
+					alert("Sound effects are Off");
+				}
+			}
+
+			function resumeGame() {
+				gamePaused = false;
+				pauseMenu.style.display = "none";
+				requestAnimationFrame(gameLoop); // Resume the game loop
+			}
+
+			// Hotbar selection support (visual)
+			let selectedItem = 1; // Default selected item
+			function updateHotbarSelection() {
+				hotbarItems.forEach((item) => {
+					item.classList.remove("active");
+					if (parseInt(item.getAttribute("data-slot")) === selectedItem) {
+						item.classList.add("active");
+					}
+				});
+			}
+			// Event listener for number key presses (1-8)
+			document.addEventListener("keydown", (e) => {
+				if (e.key >= "1" && e.key <= "8") {
+					selectedItem = parseInt(e.key);
+					updateHotbarSelection();
+				}
+			});
+			// Initial selection
+			updateHotbarSelection();
+
+			// start main loop
+			requestAnimationFrame(gameLoop);
+
+			window.addEventListener("resize", () => {
+				canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
+			});
+
+			// Detect mobile devices and show mobile controls
+			if (/Mobi|Android/i.test(navigator.userAgent)) {
+				document.getElementById("mobileControls").style.display = "flex"; // Show buttons on mobile
+			} else {
+				document.getElementById("mobileControls").style.display = "none"; // Hide on desktop
+			}
+			// Get mobile buttons
+			const moveLeftButton = document.getElementById("moveLeft");
+			const moveRightButton = document.getElementById("moveRight");
+			const jumpButton = document.getElementById("jump");
+			// Handle button presses for movement
+			if (moveLeftButton) {
+				moveLeftButton.addEventListener("touchstart", () => {
+					keys.left = true;
+				});
+				moveLeftButton.addEventListener("touchend", () => {
+					keys.left = false;
+				});
+			}
+			if (moveRightButton) {
+				moveRightButton.addEventListener("touchstart", () => {
+					keys.right = true;
+				});
+				moveRightButton.addEventListener("touchend", () => {
+					keys.right = false;
+				});
+			}
+			// Handle button presses for jumping
+			if (jumpButton) {
+				jumpButton.addEventListener("touchstart", () => {
+					if (!player.isJumping && player.onGround) {
+						keys.space = true;
+						jump();
+					}
+				});
+				jumpButton.addEventListener("touchend", () => {
+					keys.space = false;
+				});
+			}
+			let isFlying = false;
+			let enteredCombo = "";
+			const secretCombination = "3.1415236535"; // The secret code (pi with extra decimals)
+			// Listen for keypress events to build the combination
+			document.addEventListener("keydown", function(event) {
+				// Check if the pressed key is a number or period
+				if (event.key.match(/[0-9\.]/)) {
+					enteredCombo += event.key; // Add the key to the entered combination
+					// Check if the entered combo matches the secret one
+					if (enteredCombo === secretCombination) {
+						activateFlying(); // Activate flying ability
+						alert("You have unlocked the power of flight! Use the arrow keys to fly.");
+						enteredCombo = ""; // Reset the entered combination after success
+					}
+					// If the entered combo is longer than the secret, reset it
+					if (enteredCombo.length > secretCombination.length) {
+						enteredCombo = enteredCombo.slice(1); // Keep only the last n characters
+					}
+				}
+			});
+			// New variables for volume control and cutscene saving
+			let backgroundMusicVolume = 1; // Default volume
+			let saveCutsceneProgress = true; // Whether to save the cutscene progress
+			// Elements
+			const volumeControl = document.getElementById("volumeControl");
+			const volumeLabel = document.getElementById("volumeLabel");
+			const saveCutsceneProgressCheckbox = document.getElementById("saveCutsceneProgress");
+			// Listen for volume changes
+			if (volumeControl) {
+				volumeControl.addEventListener("input", (e) => {
+					backgroundMusicVolume = e.target.value;
+					backgroundMusic.volume = backgroundMusicVolume; // Update the music volume
+					volumeLabel.textContent = `${Math.round(backgroundMusicVolume * 100)}%`; // Update the label
+				});
+			}
+			// Listen for the save cutscene progress toggle
+			if (saveCutsceneProgressCheckbox) {
+				saveCutsceneProgressCheckbox.addEventListener("change", (e) => {
+					saveCutsceneProgress = e.target.checked; // Update the flag for saving cutscene progress
+				});
+			}
+			// Function to save settings
+			function saveSettings() {
+				localStorage.setItem("volume", backgroundMusicVolume);
+				localStorage.setItem("saveCutsceneProgress", saveCutsceneProgress);
+				alert("Settings saved!");
+			}
+			// Function to load settings on startup (for example, if the game is reloaded)
+			function loadSettings() {
+				const savedVolume = localStorage.getItem("volume");
+				const savedCutsceneProgress = localStorage.getItem("saveCutsceneProgress");
+
+				if (savedVolume !== null && volumeControl) {
+					backgroundMusicVolume = parseFloat(savedVolume);
+					volumeControl.value = backgroundMusicVolume;
+					volumeLabel.textContent = `${Math.round(backgroundMusicVolume * 100)}%`;
+					backgroundMusic.volume = backgroundMusicVolume;
+				}
+				if (savedCutsceneProgress !== null && saveCutsceneProgressCheckbox) {
+					saveCutsceneProgress = savedCutsceneProgress === "true";
+					saveCutsceneProgressCheckbox.checked = saveCutsceneProgress;
+				}
+			}
+			// Call loadSettings when the game starts
+			loadSettings();
+
+			// Button for saving settings
+			if (saveSettingsButton) saveSettingsButton.addEventListener("click", saveSettings);
+			document.querySelectorAll(".key-button").forEach((button) => {
+				button.addEventListener("click", (event) => {
+					const currentKey = button.innerText;
+					button.innerText = "Press a new key...";
+					window.addEventListener("keydown",
+						(e) => {
+							// Update key and display the new key on the button
+							button.innerText = e.key;
+							// Update keybinding in your key management object (e.g., keys.left)
+							// (This example doesn't wire full rebind logic)
+						}, {
+							once: true
+						});
+				});
+			});
+			const menuSaveGame = document.getElementById("menuSaveGame");
+			const menuToggleFullscreen = document.getElementById("menuToggleFullscreen");
+			const menuSettings = document.getElementById("menuSettings");
+			// Right-click menu event listeners
+			if (menuSaveGame) menuSaveGame.addEventListener("click", saveGame);
+			if (menuToggleFullscreen) menuToggleFullscreen.addEventListener("click", toggleFullscreen);
+			if (menuSettings) menuSettings.addEventListener("click", openSettingsMenu);
+			// Function to save the game (you can add actual saving logic based on your game structure)
+			function saveGame() {
+				// This could save game state, current progress, etc.
+				alert("Game has been saved!");
+				rightClickMenu.style.display = "none";
+			}
+			// Function to toggle fullscreen mode
+			function toggleFullscreen() {
+				if (!document.fullscreenElement) {
+					document.documentElement.requestFullscreen();
+				} else {
+					if (document.exitFullscreen) {
+						document.exitFullscreen();
+					}
+				}
+				rightClickMenu.style.display = "none";
+			}
+			// Function to open the settings menu
+			function openSettingsMenu() {
+				settingsMenu.style.display = "block";
+				rightClickMenu.style.display = "none";
+			}
+		</script>
+	</body>
+</html>

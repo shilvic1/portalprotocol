@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Portal Protocol</title>
+		<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+				font-family: 'Press Start 2P', cursive;
+				text-align: center;
+				background: #000;
+				color: white;
+				transition: background 0.5s ease, color 0.5s ease;
+				position: relative;
+				flex-direction: column;
+				overflow: hidden;
+			}
+
+			body {
+				transition: background 0.8s ease, color 0.8s ease;
+			}
+
+			/* Starfield Background Canvas */
+			#bgCanvas {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 0;
+			}
+
+			/* CRT Scanline Overlay */
+			body::after {
+				content: "";
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: repeating-linear-gradient(rgba(0, 0, 0, 0.05) 0,
+						rgba(0, 0, 0, 0.05) 1px,
+						transparent 2px);
+				pointer-events: none;
+				z-index: 2;
+			}
+
+			.profile {
+				position: absolute;
+				top: 20px;
+				left: 20px;
+				color: white;
+				font-size: 18px;
+				display: flex;
+				flex-direction: column;
+				z-index: 3;
+			}
+
+			.profile span {
+				margin: 5px 0;
+			}
+
+			.container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				position: relative;
+				z-index: 3;
+			}
+
+			.logo {
+				width: 100%;
+				max-width: 400px;
+				height: auto;
+				margin-bottom: 30px;
+				animation: fadeIn 1.5s ease-in-out;
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+					transform: scale(0.8);
+				}
+
+				to {
+					opacity: 1;
+					transform: scale(1);
+				}
+			}
+
+			.button {
+				display: block;
+				margin: 20px 0;
+				padding: 18px 40px;
+				font-size: 20px;
+				color: white;
+				background: transparent;
+				border: 4px solid cyan;
+				cursor: pointer;
+				font-family: 'Press Start 2P', cursive;
+				border-radius: 15px;
+				transition: all 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+				width: 100%;
+				max-width: 280px;
+				animation: buttonFadeIn 0.6s ease-in-out;
+				text-align: center;
+				letter-spacing: 1px;
+				box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+			}
+
+			.button:hover {
+				background: cyan;
+				color: black;
+				transform: scale(1.08);
+				box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+			}
+
+			.button:active {
+				transform: scale(1);
+				background: #00b3b3;
+				color: white;
+			}
+
+			.light-mode {
+				background: white;
+				color: black;
+			}
+
+			.light-mode .button {
+				color: black;
+				border: 4px solid black;
+			}
+
+			.light-mode .button:hover {
+				background: black;
+				color: white;
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+			}
+
+			.light-mode {
+				background: white !important;
+				color: black !important;
+			}
+
+			/* Hide starfield in light mode */
+			.light-mode #bgCanvas {
+				display: none;
+			}
+
+			.modal {
+				display: none;
+				position: fixed;
+				z-index: 5;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0, 0, 0, 0.5);
+				padding-top: 60px;
+			}
+
+			.modal-content {
+				background-color: #fff;
+				margin: 5% auto;
+				padding: 20px;
+				border: 1px solid #888;
+				width: 80%;
+				max-width: 400px;
+				color: black;
+				border-radius: 15px;
+			}
+
+			.close-button {
+				color: #aaa;
+				float: right;
+				font-size: 28px;
+				font-weight: bold;
+			}
+
+			.close-button:hover {
+				color: black;
+				cursor: pointer;
+			}
+
+			.loading-spinner {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.5);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 6;
+			}
+
+			.spinner {
+				border: 4px solid #f3f3f3;
+				border-top: 4px solid #3498db;
+				border-radius: 50%;
+				width: 50px;
+				height: 50px;
+				animation: spin 2s linear infinite;
+			}
+
+			@keyframes spin {
+				0% {
+					transform: rotate(0deg);
+				}
+
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+
+			@keyframes buttonFadeIn {
+				from {
+					opacity: 0;
+					transform: translateY(10px);
+				}
+
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			@media (max-width: 600px) {
+				.button {
+					width: 80%;
+					font-size: 18px;
+					padding: 15px 30px;
+				}
+
+				.logo {
+					max-width: 300px;
+				}
+
+				.profile {
+					font-size: 16px;
+				}
+			}
+
+			.button:focus {
+				outline: 3px solid cyan;
+				outline-offset: 3px;
+				box-shadow: 0 0 10px cyan;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="bgCanvas"></canvas>
+		<audio id="backgroundMusic" loop>
+			<source src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/menu%20music.mp3?v=1741391132769" type="audio/mp3" /> Your browser does not support the audio element.
+		</audio>
+		<div id="loading" class="loading-spinner" style="display: none;">
+			<div class="spinner"></div>
+		</div>
+		<div class="profile">
+			<span id="profileName">Username: Guest</span>
+			<span id="profileScore">Score: 0</span>
+		</div>
+		<div class="container">
+			<img id="logo" src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/PP.png?v=1740874897043" alt="Portal Protocol Logo" class="logo" />
+			<button class="button" onclick="startGame()">
+				<i class="fas fa-play"></i>Start Game </button>
+			<button class="button" onclick="openSettings()">
+				<i class="fas fa-cogs"></i>Settings </button>
+			<button class="button" onclick="toggleTheme()">
+				<i class="fas fa-moon"></i>Toggle Theme </button>
+			<button class="button" onclick="openControls()">
+				<i class="fas fa-gamepad"></i>Controls </button>
+		</div>
+		<div id="settingsModal" class="modal">
+			<div class="modal-content">
+				<span class="close-button" onclick="closeSettings()">&times;</span>
+				<h2>Settings</h2>
+				<label for="volume">Volume:</label>
+				<input type="range" id="volume" min="0" max="100" />
+				<br />
+				<br />
+				<label for="difficulty">Difficulty:</label>
+				<select id="difficulty">
+					<option value="easy">Easy</option>
+					<option value="medium">Medium</option>
+					<option value="hard">Hard</option>
+				</select>
+			</div>
+		</div>
+		<div id="controlsModal" class="modal">
+			<div class="modal-content">
+				<span class="close-button" onclick="closeControls()">&times;</span>
+				<h2>Game Controls</h2>
+				<ul style="list-style:none; padding:0; text-align:left; line-height:1.8;">
+					<li>🎮 <strong>Arrow Keys / WASD</strong> – Move </li>
+					<li>⏫ <strong>Space</strong> – Jump / Action </li>
+					<li>⚡ <strong>Shift</strong> – Sprint </li>
+					<li>⏸️ <strong>Esc</strong> – Pause / Menu </li>
+					<li>⏸️ <strong>E</strong> – Interact </li>
+					<li>🖱️ <strong>Right-click</strong> – Context Menu </li>
+				</ul>
+			</div>
+		</div>
+		<footer style="position:static;bottom:15px;font-size:10px;opacity:0.6;z-index:3;"> v0.1.2 – Developed by Ruben • Designed by Theo </footer>
+		<script>
+			// Starfield background
+			const canvas = document.getElementById('bgCanvas');
+			const ctx = canvas.getContext('2d');
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			let stars = Array.from({
+				length: 100
+			}, () => ({
+				x: Math.random() * canvas.width,
+				y: Math.random() * canvas.height,
+				size: Math.random() * 2,
+				speed: Math.random() * 0.5 + 0.2
+			}));
+
+			function animateStars() {
+				ctx.fillStyle = 'rgba(0,0,0,0.3)';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				ctx.fillStyle = 'cyan';
+				stars.forEach(s => {
+					ctx.beginPath();
+					ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+					ctx.fill();
+					s.y += s.speed;
+					if (s.y > canvas.height) s.y = 0;
+				});
+				requestAnimationFrame(animateStars);
+			}
+			animateStars();
+			// UI logic
+			function loadProfile() {
+				const username = localStorage.getItem('username') || 'Guest';
+				const score = localStorage.getItem('score') || 0;
+				document.getElementById('profileName').textContent = `Username: ${username}`;
+				document.getElementById('profileScore').textContent = `Score: ${score}`;
+			}
+
+			function openControls() {
+				document.getElementById('controlsModal').style.display = 'block';
+			}
+
+			function closeControls() {
+				document.getElementById('controlsModal').style.display = 'none';
+			}
+
+			function startGame() {
+				document.getElementById('loading').style.display = 'flex';
+				setTimeout(() => (window.location.href = 'game.html'), 500);
+			}
+
+			function openSettings() {
+				document.getElementById('settingsModal').style.display = 'block';
+			}
+
+			function closeSettings() {
+				document.getElementById('settingsModal').style.display = 'none';
+			}
+
+			function toggleTheme() {
+				document.body.classList.toggle('light-mode');
+				const logo = document.getElementById('logo');
+				if (document.body.classList.contains('light-mode')) {
+					logo.src = 'https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/Copy%20of%20PP.png?v=1741134743824';
+				} else {
+					logo.src = 'https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/PP.png?v=1740874897043';
+				}
+				localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+			}
+			if (localStorage.getItem('theme') === 'light') {
+				document.body.classList.add('light-mode');
+				document.getElementById('logo').src = 'https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/Copy%20of%20PP.png?v=1741134743824';
+			}
+
+			function setVolume() {
+				const volume = document.getElementById('volume').value;
+				localStorage.setItem('volume', volume);
+				document.getElementById('backgroundMusic').volume = volume / 100;
+			}
+
+			function loadVolume() {
+				const savedVolume = localStorage.getItem('volume') || 100;
+				document.getElementById('volume').value = savedVolume;
+				document.getElementById('backgroundMusic').volume = savedVolume / 100;
+			}
+			window.onload = () => {
+				loadProfile();
+				loadVolume();
+				document.getElementById('backgroundMusic').play();
+			};
+			document.getElementById('volume').addEventListener('input', setVolume);
+			document.querySelectorAll('.button').forEach(btn => {
+				btn.addEventListener('keydown', (e) => {
+					if (e.key === 'Enter') btn.click();
+				});
+			});
+		</script>
+	</body>
+</html> Btw No ChatGpt Was Used in the making of this Game
