@@ -498,57 +498,61 @@
 				transform: translateY(0);
 			}
 
-			/* Objective Box (middle-right) */
-			#objectiveBox {
+			/* Objective UI (top-left) added from the requested snippet */
+			#objective {
 				position: fixed;
-				top: 50%;
-				right: 20px;
-				transform: translateY(-50%);
-				background: rgba(10, 10, 10, 0.85);
-				color: #fff;
-				padding: 12px 14px;
+				top: 22px;
+				left: 22px;
+				background: rgba(0,0,0,0.7);
+				color: cyan;
+				padding: 10px 14px;
 				border-radius: 8px;
-				border: 2px solid rgba(0, 255, 255, 0.12);
-				width: 260px;
-				z-index: 200;
+				border: 2px solid rgba(0,255,255,0.15);
+				font-family: "Press Start 2P", cursive;
 				font-size: 12px;
-				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+				z-index: 1001;
+				max-width: 360px;
 			}
-
-			#objectiveBox h3 {
-				margin: 0 0 8px 0;
-				font-size: 13px;
-				text-align: left;
-				color: #66ddff;
-			}
-
-			#objectiveBox .task {
-				display: flex;
-				align-items: flex-start;
-				gap: 8px;
-			}
-
-			#objectiveBox .task .bullet {
-				width: 14px;
-				height: 14px;
-				border-radius: 3px;
-				background: rgba(255, 255, 255, 0.06);
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
+			#objective .title {
+				color: #fff;
 				font-size: 10px;
-				color: #222;
+				margin-bottom: 6px;
 			}
-
-			#objectiveBox .task.done .bullet {
-				background: cyan;
-				color: #003;
-			}
-
-			#objectiveBox .task p {
-				margin: 0;
+			#objective .text {
+				color: cyan;
 				font-size: 12px;
-				line-height: 1.2;
+			}
+
+			/* Door highlight when objective directs player to it */
+			.door-highlight {
+				box-shadow: 0 0 18px rgba(0,255,255,0.85);
+				transition: box-shadow 0.35s ease;
+				transform: translateZ(0);
+			}
+
+			/* Hallway overlay */
+			#hallwayOverlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				pointer-events: none;
+				z-index: 900;
+				display: none;
+			}
+			#hallwayOverlay .label {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				color: white;
+				font-size: 28px;
+				background: rgba(0,0,0,0.6);
+				padding: 12px 18px;
+				border-radius: 8px;
+				border: 2px solid cyan;
+				font-family: "Press Start 2P", cursive;
 			}
 		</style>
 		<button id="skipButton">
@@ -557,20 +561,14 @@
 		<!-- Notification container -->
 		<div id="notification" aria-live="polite" role="status" style="display:block;"></div>
 
-		<!-- Objective Box -->
-		<div id="objectiveBox" aria-live="polite" role="status">
-			<h3>Objective</h3>
-			<div id="objectiveContent">
-				<div class="task" id="task-chest">
-					<div class="bullet" id="bullet-chest">1</div>
-					<p id="task-chest-text">Go to the chest and pick up beginner items</p>
-				</div>
-				<div class="task" id="task-door" style="margin-top:8px; opacity:0.6">
-					<div class="bullet" id="bullet-door">2</div>
-					<p id="task-door-text">Go through the door to the hallway</p>
-				</div>
-			</div>
+		<!-- Objective UI (top-left) -->
+		<div id="objective" aria-live="polite" role="status" style="display:block;">
+			<div class="title">Objective</div>
+			<div class="text" id="objectiveText">Collect the beginner items from the chest.</div>
 		</div>
+
+		<!-- Hallway overlay (shown when entering hallway) -->
+		<div id="hallwayOverlay"><div class="label">Hallway</div></div>
 
 		<!-- Chest UI -->
 		<div id="chestUI" style="
@@ -590,7 +588,7 @@
 			<div style="display: grid; grid-template-columns: repeat(3, 60px); gap: 10px">
 				<button class="chest-item">
 					<div class="item-content">
-						<img src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/4e707c54-a28f-454b-852f-ae825ca9f20f.image.png?v=1743862665001" />
+						<img src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/4e707c54-a28f-454b-852f-ae825ca9f20f.image.png?v=1743862665001"  alt="Gun" />
 					</div>
 				</button>
 				<!-- Medkit text replaced with the provided image filename -->
@@ -788,17 +786,18 @@
 			const hotbarToggle = document.getElementById("hotbarToggle"); // Get the hotbar toggle checkbox
 			const hotbarItems = document.querySelectorAll(".hotbar-item");
 			const notificationEl = document.getElementById("notification");
+			const objectiveTextEl = document.getElementById("objectiveText");
+			const hallwayOverlay = document.getElementById("hallwayOverlay");
 
-			// Objective system variables
-			// 0 = chest objective active, 1 = door objective active, 2 = completed / hallway
-			let objectiveStage = 0;
-			const objectiveBox = document.getElementById("objectiveBox");
-			const taskChestEl = document.getElementById("task-chest");
-			const taskChestText = document.getElementById("task-chest-text");
-			const bulletChest = document.getElementById("bullet-chest");
-			const taskDoorEl = document.getElementById("task-door");
-			const taskDoorText = document.getElementById("task-door-text");
-			const bulletDoor = document.getElementById("bullet-door");
+			// Objectives state (from the requested code)
+			// phases: 'pickupChest' -> 'goDoor' -> 'hallway'
+			let objectivePhase = 'pickupChest';
+			let chestItemsPicked = 0;
+			const chestItemsRequired = 2; // how many items to pick up before door objective activates
+
+			function setObjective(text) {
+				if (objectiveTextEl) objectiveTextEl.textContent = text;
+			}
 
 			// --- Particle system ---
 			const particles = [];
@@ -921,34 +920,6 @@
 				}, duration);
 			}
 
-			// Objective helpers
-			function setObjectiveStage(stage) {
-				objectiveStage = stage;
-				if (stage === 0) {
-					// chest objective active
-					taskChestEl.classList.remove('done');
-					taskDoorEl.style.opacity = 0.6;
-					taskDoorEl.classList.remove('done');
-					bulletChest.textContent = '1';
-					bulletDoor.textContent = '2';
-					showNotification('Objective: Get beginner items from the chest');
-				} else if (stage === 1) {
-					// chest done, door active
-					taskChestEl.classList.add('done');
-					taskDoorEl.style.opacity = 1;
-					showNotification('Objective updated: Go to the door and enter');
-				} else if (stage === 2) {
-					// completed / hallway
-					taskDoorEl.classList.add('done');
-					taskDoorEl.style.opacity = 1;
-					showNotification('Objective complete: You have entered the hallway', 3000);
-					// Optionally hide objective box after a short delay
-					setTimeout(() => {
-						if (objectiveBox) objectiveBox.style.display = 'none';
-					}, 2000);
-				}
-			}
-
 			// Add item to the first available hotbar slot (icon or label)
 			function addItemToHotbar(itemName, imgSrc = null) {
 				for (let i = 0; i < hotbarItems.length; i++) {
@@ -991,8 +962,7 @@
 						updateHotbarSelection(); // refresh selection UI if needed
 						// Show notification when item is added (notifying Gun/Medkit or other)
 						showNotification(`${itemName} has been added to Hotbar`);
-						// Check objectives: if the chest objective is active and player added an item, advance objective
-						checkObjectiveProgress();
+						// NOTE: chest progression handled where items are picked
 						return true;
 					}
 				}
@@ -1001,14 +971,26 @@
 				return false;
 			}
 
-			function checkObjectiveProgress() {
-				// If the player has any hotbar items and objectiveStage is 0, advance to door objective
-				let itemsCount = 0;
-				hotbarItems.forEach(slot => {
-					if (slot.dataset.item && slot.dataset.item !== '') itemsCount++;
-				});
-				if (itemsCount > 0 && objectiveStage === 0) {
-					setObjectiveStage(1);
+			// Called after successful pickup of chest items to update objective progression.
+			function chestItemPicked() {
+				chestItemsPicked++;
+				// Update objective feedback
+				setObjective(`Picked up ${chestItemsPicked}/${chestItemsRequired} beginner items.`);
+				if (chestItemsPicked >= chestItemsRequired) {
+					// advance objective to door
+					objectivePhase = 'goDoor';
+					setObjective('Proceed through the door to the hallway.');
+					showNotification('Objective Updated: Go through the door', 2500);
+					highlightDoor(true);
+				}
+			}
+
+			function highlightDoor(enable) {
+				if (!door) return;
+				if (enable) {
+					door.classList.add('door-highlight');
+				} else {
+					door.classList.remove('door-highlight');
 				}
 			}
 
@@ -1079,15 +1061,16 @@
 					// If the slot is empty do nothing
 					if (!itemName && !imgSrc) return;
 					// Move Gun sprite to hotbar (use imgSrc) and remove from chest
+					let success = false;
 					if (/gun/i.test(itemName) && imgSrc) {
-						const success = addItemToHotbar('Gun', imgSrc);
+						success = addItemToHotbar('Gun', imgSrc);
 						if (success) {
 							// remove the visual from chest (so it disappears)
 							item.innerHTML = '';
 						}
 					} else if (/medkit/i.test(itemName) && imgSrc) {
 						// If medkit has an image, use that image for the hotbar slot
-						const success = addItemToHotbar('Medkit', imgSrc);
+						success = addItemToHotbar('Medkit', imgSrc);
 						if (success) {
 							item.innerHTML = ''; // remove medkit from chest UI
 						}
@@ -1100,14 +1083,18 @@
 				<rect x="18" y="26" width="28" height="12" fill="%23ffffff"/>
 				<rect x="28" y="18" width="8" height="28" fill="%23ffffff"/>
 			</svg>`);
-						const success = addItemToHotbar('Medkit', medkitDataUrl);
+						success = addItemToHotbar('Medkit', medkitDataUrl);
 						if (success) {
 							item.innerHTML = ''; // remove medkit text from chest UI
 						}
 					} else {
 						// Generic behavior: add text label to hotbar and clear chest slot
-						const success = addItemToHotbar(itemName || 'Item', imgSrc);
+						success = addItemToHotbar(itemName || 'Item', imgSrc);
 						if (success) item.innerHTML = '';
+					}
+					// If an item was successfully added, count it toward the beginner objective.
+					if (success) {
+						chestItemPicked();
 					}
 					// hide chest UI and any interact prompt
 					chestUI.style.display = 'none';
@@ -1122,43 +1109,78 @@
 					if (!isCutsceneComplete) return; // ignore interaction during cutscene
 					isHoveringDoor = true;
 					doorInteractText.style.display = "block";
+					doorInteractText.innerText = "Press E to Enter";
 				});
 				door.addEventListener("mouseleave", () => {
 					isHoveringDoor = false;
 					doorInteractText.style.display = "none";
 				});
+				// Click to attempt to enter the door
+				door.addEventListener("click", () => {
+					if (!isCutsceneComplete) return;
+					attemptEnterDoor();
+				});
 			}
-			// Handle interaction via click or key press
-			function enterDoor() {
-				// If the chest objective hasn't been completed, block entry and notify
-				if (objectiveStage < 1) {
-					showNotification('You should pick up beginner items first', 2000);
-					return;
-				}
-				if (!isCutsceneComplete) return; // cannot enter during cutscene
-				if (isHoveringDoor) {
-					// Change background to a hallway image
-					document.body.style.backgroundImage = "url('https://images.unsplash.com/photo-1529400971008-f566de0e6dfc?auto=format&fit=crop&w=1400&q=80')";
-					document.body.style.backgroundSize = "cover";
-					document.body.style.backgroundPosition = "center";
-					// If there is a player DOM element move it; otherwise it's ignored
-					const playerEl = document.getElementById("player");
-					if (playerEl) {
-						playerEl.style.left = "50%";
-						playerEl.style.top = "50%";
-						playerEl.style.transform = "translate(-50%, -50%)";
-					}
-					doorInteractText.style.display = "none";
-					// mark objective complete and advance stage
-					setObjectiveStage(2);
-				}
-			}
-			if (door) door.addEventListener("click", enterDoor);
+
+			// Open door when player presses "E"
 			document.addEventListener("keydown", (e) => {
 				if ((e.key === "e" || e.key === "E") && isHoveringDoor && isCutsceneComplete) {
-					enterDoor();
+					attemptEnterDoor();
 				}
 			});
+
+			function attemptEnterDoor() {
+				if (objectivePhase === 'pickupChest') {
+					showNotification('You should pick up the beginner items first.', 2000);
+					setObjective('Collect the beginner items from the chest.');
+					return;
+				}
+				if (objectivePhase === 'goDoor') {
+					// Enter hallway
+					enterHallway();
+				}
+			}
+
+			function enterHallway() {
+				// Mark objective
+				objectivePhase = 'hallway';
+				setObjective('Objective Complete: Entered the hallway. Explore ahead.');
+				showNotification('Entering hallway...', 1600);
+				highlightDoor(false);
+				// visually transition to hallway: show overlay, adjust player position
+				hallwayOverlay.style.display = 'block';
+				setTimeout(() => {
+					// hide world UI and move player to hallway spawn
+					hideWorldUI();
+					player.x = canvas.width / 2;
+					player.y = canvas.height / 2 - 30;
+					// simple simulated hallway view change by changing canvas background color
+					canvas.style.background = '#222';
+					// small delay then hide overlay pointer events so gameplay continues
+					setTimeout(() => {
+						hallwayOverlay.style.display = 'none';
+					}, 1200);
+				}, 600);
+			}
+
+			// Note: updateHotbarSelection already existed; extend it so hotbar appears if items exist
+			let selectedItem = 1; // Default selected item
+			function updateHotbarSelection() {
+				hotbarItems.forEach((item) => {
+					item.classList.remove("active");
+					if (parseInt(item.getAttribute("data-slot")) === selectedItem) {
+						item.classList.add("active");
+					}
+				});
+				// Also ensure hotbar is visible when it has items and toggle allows it
+				let anyItem = false;
+				hotbarItems.forEach(s => { if (s.dataset.item && s.dataset.item !== '') anyItem = true; });
+				if (anyItem && hotbarToggle && hotbarToggle.checked) {
+					hotbar.style.display = 'flex';
+				}
+			}
+
+			// Rest of existing code (cutscene, game loop, input, etc.)
 			const skipButton = document.getElementById("skipButton");
 			skipButton.addEventListener("click", skipCutscene);
 			const pauseMenu = document.getElementById("pauseMenu");
@@ -1167,6 +1189,7 @@
 			const rightClickMenu = document.getElementById("rightClickMenu");
 			const menuRestart = document.getElementById("menuRestart");
 			const menuToggleSound = document.getElementById("menuToggleSound");
+
 			// Sound effect URLs
 			const jumpSFX = new Audio("https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/cartoon-jump-6462%20(1).mp3?v=1743861440466");
 			const walkingSFX = new Audio("https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/loud-footsteps-62038-%5BAudioTrimmer.com%5D-%5BAudioTrimmer.com%5D.mp3?v=1743995310590");
@@ -1452,8 +1475,10 @@
 						skipButton.style.display = "none";
 						// show world UI now that cutscene is over
 						showWorldUI();
-						// ensure objective starts at chest objective
-						setObjectiveStage(0);
+						// ensure objective starts at chest objective (from requested code)
+						objectivePhase = 'pickupChest';
+						chestItemsPicked = 0;
+						setObjective('Collect the beginner items from the chest.');
 					}
 				} else {
 					// Movement and physics - uses dt
@@ -1530,7 +1555,9 @@
 				skipButton.style.display = "none";
 				showWorldUI();
 				// ensure objective starts at chest objective
-				setObjectiveStage(0);
+				objectivePhase = 'pickupChest';
+				chestItemsPicked = 0;
+				setObjective('Collect the beginner items from the chest.');
 			}
 
 			function restartGame() {
@@ -1560,8 +1587,9 @@
 				player.health = player.maxHealth;
 				player.stamina = player.maxStamina;
 				// reset objective display
-				if (objectiveBox) objectiveBox.style.display = 'block';
-				setObjectiveStage(0);
+				objectivePhase = 'pickupChest';
+				chestItemsPicked = 0;
+				setObjective('Collect the beginner items from the chest.');
 				// kick off loop
 				requestAnimationFrame(gameLoop);
 			}
@@ -1641,8 +1669,7 @@
 				requestAnimationFrame(gameLoop); // Resume the game loop
 			}
 			// Hotbar selection support (visual)
-			let selectedItem = 1; // Default selected item
-			function updateHotbarSelection() {
+			function updateHotbarSelectionVisual() {
 				hotbarItems.forEach((item) => {
 					item.classList.remove("active");
 					if (parseInt(item.getAttribute("data-slot")) === selectedItem) {
@@ -1659,6 +1686,7 @@
 			});
 			// Initial selection
 			updateHotbarSelection();
+
 			// start main loop
 			requestAnimationFrame(gameLoop);
 			window.addEventListener("resize", () => {
@@ -1815,8 +1843,12 @@
 				rightClickMenu.style.display = "none";
 			}
 
-			// Ensure objective box starts in chest state if cutscene already complete on load
-			if (isCutsceneComplete) setObjectiveStage(0);
+			// Ensure objective starts in pickupChest state if cutscene already complete on load
+			if (isCutsceneComplete) {
+				objectivePhase = 'pickupChest';
+				chestItemsPicked = 0;
+				setObjective('Collect the beginner items from the chest.');
+			}
 		</script>
 	</body>
 </html>
