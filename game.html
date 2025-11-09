@@ -523,11 +523,15 @@
 			<div style="display: grid; grid-template-columns: repeat(3, 60px); gap: 10px">
 				<button class="chest-item">
 					<div class="item-content">
-						Gun
-						<img src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/4e707c54-a28f-454b-852f-ae825ca9f20f.image.png?v=1743862665001" alt="Gun" />
+						<img src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/4e707c54-a28f-454b-852f-ae825ca9f20f.image.png?v=1743862665001"  />
 					</div>
 				</button>
-				<button class="chest-item"><div class="item-content">Medkit</div></button>
+				<!-- Medkit text replaced with the provided image filename -->
+				<button class="chest-item">
+					<div class="item-content">
+						<img src="image-removebg-preview (1).png" alt="Medkit" />
+					</div>
+				</button>
 				<button class="chest-item"></button>
 				<button class="chest-item"></button>
 				<button class="chest-item"></button>
@@ -959,8 +963,14 @@
 							// remove the visual from chest (so it disappears)
 							item.innerHTML = '';
 						}
+					} else if (/medkit/i.test(itemName) && imgSrc) {
+						// If medkit has an image, use that image for the hotbar slot
+						const success = addItemToHotbar('Medkit', imgSrc);
+						if (success) {
+							item.innerHTML = ''; // remove medkit from chest UI
+						}
 					} else if (/medkit/i.test(itemName)) {
-						// For medkit, add label to hotbar and remove text from chest
+						// For medkit without an image, fallback to the SVG icon
 						const medkitDataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(
 							`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="%23b91c1c"/><rect x="18" y="26" width="28" height="12" fill="%23ffffff"/><rect x="28" y="18" width="8" height="28" fill="%23ffffff"/></svg>`
 						);
