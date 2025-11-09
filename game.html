@@ -473,10 +473,38 @@
 			#closeChestButton:hover {
 				background-color: darkred;
 			}
+
+			/* Notification (top-right) */
+			#notification {
+				position: fixed;
+				top: 20px;
+				right: 20px;
+				background: rgba(0, 0, 0, 0.8);
+				color: white;
+				padding: 10px 14px;
+				border-radius: 8px;
+				box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+				font-family: "Press Start 2P", cursive;
+				font-size: 12px;
+				opacity: 0;
+				transition: opacity 0.35s ease, transform 0.35s ease;
+				transform: translateY(-6px);
+				z-index: 1000;
+				pointer-events: none;
+			}
+
+			#notification.show {
+				opacity: 1;
+				transform: translateY(0);
+			}
 		</style>
 		<button id="skipButton">
 			<i class="fas fa-forward"></i> Skip Cutscene </button>
 		<canvas id="gameCanvas" width="664" height="492"></canvas>
+
+		<!-- Notification container -->
+		<div id="notification" aria-live="polite" role="status" style="display:block;"></div>
+
 		<!-- Chest UI -->
 		<div id="chestUI" style="
         display: none;
@@ -693,6 +721,7 @@
 			const hotbar = document.getElementById("hotbar");
 			const hotbarToggle = document.getElementById("hotbarToggle"); // Get the hotbar toggle checkbox
 			const hotbarItems = document.querySelectorAll(".hotbar-item");
+			const notificationEl = document.getElementById("notification");
 
 			// --- Particle system ---
 			const particles = [];
@@ -783,6 +812,26 @@
 			// initially hide world UI while cutscene plays
 			hideWorldUI();
 
+			// Notification function (top-right small popup)
+			let notifTimeout = null;
+			function showNotification(message, duration = 2200) {
+				if (!notificationEl) return;
+				notificationEl.textContent = message;
+				notificationEl.classList.add('show');
+				// clear any pending timeout so notifications don't overlap weirdly
+				if (notifTimeout) {
+					clearTimeout(notifTimeout);
+					notifTimeout = null;
+				}
+				notifTimeout = setTimeout(() => {
+					notificationEl.classList.remove('show');
+					// small delay to ensure transition completes before clearing text
+					setTimeout(() => {
+						if (notificationEl) notificationEl.textContent = '';
+					}, 360);
+				}, duration);
+			}
+
 			// Add item to the first available hotbar slot (icon or label)
 			function addItemToHotbar(itemName, imgSrc = null) {
 				for (let i = 0; i < hotbarItems.length; i++) {
@@ -821,6 +870,10 @@
 							}
 						}, { once: false });
 						updateHotbarSelection(); // refresh selection UI if needed
+
+						// Show notification when item is added (notifying Gun/Medkit or other)
+						showNotification(`${itemName} has been added to Hotbar`);
+
 						return true;
 					}
 				}
