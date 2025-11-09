@@ -497,13 +497,80 @@
 				opacity: 1;
 				transform: translateY(0);
 			}
+
+			/* Objective Box (middle-right) */
+			#objectiveBox {
+				position: fixed;
+				top: 50%;
+				right: 20px;
+				transform: translateY(-50%);
+				background: rgba(10, 10, 10, 0.85);
+				color: #fff;
+				padding: 12px 14px;
+				border-radius: 8px;
+				border: 2px solid rgba(0, 255, 255, 0.12);
+				width: 260px;
+				z-index: 200;
+				font-size: 12px;
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+			}
+
+			#objectiveBox h3 {
+				margin: 0 0 8px 0;
+				font-size: 13px;
+				text-align: left;
+				color: #66ddff;
+			}
+
+			#objectiveBox .task {
+				display: flex;
+				align-items: flex-start;
+				gap: 8px;
+			}
+
+			#objectiveBox .task .bullet {
+				width: 14px;
+				height: 14px;
+				border-radius: 3px;
+				background: rgba(255, 255, 255, 0.06);
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 10px;
+				color: #222;
+			}
+
+			#objectiveBox .task.done .bullet {
+				background: cyan;
+				color: #003;
+			}
+
+			#objectiveBox .task p {
+				margin: 0;
+				font-size: 12px;
+				line-height: 1.2;
+			}
 		</style>
 		<button id="skipButton">
 			<i class="fas fa-forward"></i> Skip Cutscene </button>
 		<canvas id="gameCanvas" width="664" height="492"></canvas>
-
 		<!-- Notification container -->
 		<div id="notification" aria-live="polite" role="status" style="display:block;"></div>
+
+		<!-- Objective Box -->
+		<div id="objectiveBox" aria-live="polite" role="status">
+			<h3>Objective</h3>
+			<div id="objectiveContent">
+				<div class="task" id="task-chest">
+					<div class="bullet" id="bullet-chest">1</div>
+					<p id="task-chest-text">Go to the chest and pick up beginner items</p>
+				</div>
+				<div class="task" id="task-door" style="margin-top:8px; opacity:0.6">
+					<div class="bullet" id="bullet-door">2</div>
+					<p id="task-door-text">Go through the door to the hallway</p>
+				</div>
+			</div>
+		</div>
 
 		<!-- Chest UI -->
 		<div id="chestUI" style="
@@ -523,7 +590,7 @@
 			<div style="display: grid; grid-template-columns: repeat(3, 60px); gap: 10px">
 				<button class="chest-item">
 					<div class="item-content">
-						<img src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/4e707c54-a28f-454b-852f-ae825ca9f20f.image.png?v=1743862665001"  />
+						<img src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/4e707c54-a28f-454b-852f-ae825ca9f20f.image.png?v=1743862665001" />
 					</div>
 				</button>
 				<!-- Medkit text replaced with the provided image filename -->
@@ -656,7 +723,6 @@
 			const ctx = canvas.getContext("2d");
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
-
 			const player = {
 				x: canvas.width / 2,
 				y: canvas.height / 2 - 50,
@@ -678,7 +744,6 @@
 				// equipped item (if any)
 				equipped: null
 			};
-
 			// Updated cutscene messages
 			const cutsceneMessages = ["Initializing Scan...", "New Id Detected- rift_Techinican_0_167.", "Welcome, KAI WALKER", "Welcome to Drt Inc, Dimensional Rift Technologies Inc.", "You are the newest Rift Technician!", "Your job is monitor, maintain and stabilize Rifts to prevent dimensional collapse.", "Do you think you can complete the portal protocol?", ];
 			const platform = {
@@ -688,7 +753,6 @@
 				height: 50,
 				color: "grey",
 			};
-
 			let currentMessageIndex = 0;
 			let currentLineIndex = 0;
 			let isCutsceneComplete = false;
@@ -707,15 +771,13 @@
 				shift: false,
 				enter: false,
 			};
-
 			// Stamina system settings
 			const staminaConfig = {
-				regenRate: 18,      // stamina per second
-				drainRate: 40,     // stamina per second while sprinting
-				regenDelay: 1.0    // seconds after sprint before regen starts
+				regenRate: 18, // stamina per second
+				drainRate: 40, // stamina per second while sprinting
+				regenDelay: 1.0 // seconds after sprint before regen starts
 			};
 			let staminaRegenTimer = 0;
-
 			const chestUI = document.getElementById("chestUI");
 			const interactText = document.getElementById("interact-text");
 			const chest = document.getElementById("chest");
@@ -726,6 +788,17 @@
 			const hotbarToggle = document.getElementById("hotbarToggle"); // Get the hotbar toggle checkbox
 			const hotbarItems = document.querySelectorAll(".hotbar-item");
 			const notificationEl = document.getElementById("notification");
+
+			// Objective system variables
+			// 0 = chest objective active, 1 = door objective active, 2 = completed / hallway
+			let objectiveStage = 0;
+			const objectiveBox = document.getElementById("objectiveBox");
+			const taskChestEl = document.getElementById("task-chest");
+			const taskChestText = document.getElementById("task-chest-text");
+			const bulletChest = document.getElementById("bullet-chest");
+			const taskDoorEl = document.getElementById("task-door");
+			const taskDoorText = document.getElementById("task-door-text");
+			const bulletDoor = document.getElementById("bullet-door");
 
 			// --- Particle system ---
 			const particles = [];
@@ -742,7 +815,16 @@
 			};
 			// create a particle object
 			function createParticle(x, y, vx, vy, size, color, life) {
-				return { x, y, vx, vy, size, color, life, maxLife: life };
+				return {
+					x,
+					y,
+					vx,
+					vy,
+					size,
+					color,
+					life,
+					maxLife: life
+				};
 			}
 			// spawn particles for jump
 			function spawnJumpParticles() {
@@ -762,6 +844,7 @@
 			}
 			// spawn sprint particles (continuous)
 			let sprintParticleAccumulator = 0;
+
 			function spawnSprintParticle() {
 				const px = player.x + player.width / 2;
 				const py = player.y + player.height - 6;
@@ -775,6 +858,7 @@
 				const life = particleConfig.sprintLife + Math.round(Math.random() * 10);
 				particles.push(createParticle(px + offsetX, py, vx * particleConfig.sprintSpeed, vy, size, color, life));
 			}
+
 			function updateAndDrawParticles(dt) {
 				// update
 				for (let i = particles.length - 1; i >= 0; i--) {
@@ -805,6 +889,7 @@
 				// only show hotbar if toggle is checked
 				if (hotbar) hotbar.style.display = hotbarToggle && hotbarToggle.checked ? "flex" : "none";
 			}
+
 			function hideWorldUI() {
 				if (chest) chest.style.display = "none";
 				if (door) door.style.display = "none";
@@ -815,9 +900,9 @@
 			}
 			// initially hide world UI while cutscene plays
 			hideWorldUI();
-
 			// Notification function (top-right small popup)
 			let notifTimeout = null;
+
 			function showNotification(message, duration = 2200) {
 				if (!notificationEl) return;
 				notificationEl.textContent = message;
@@ -834,6 +919,34 @@
 						if (notificationEl) notificationEl.textContent = '';
 					}, 360);
 				}, duration);
+			}
+
+			// Objective helpers
+			function setObjectiveStage(stage) {
+				objectiveStage = stage;
+				if (stage === 0) {
+					// chest objective active
+					taskChestEl.classList.remove('done');
+					taskDoorEl.style.opacity = 0.6;
+					taskDoorEl.classList.remove('done');
+					bulletChest.textContent = '1';
+					bulletDoor.textContent = '2';
+					showNotification('Objective: Get beginner items from the chest');
+				} else if (stage === 1) {
+					// chest done, door active
+					taskChestEl.classList.add('done');
+					taskDoorEl.style.opacity = 1;
+					showNotification('Objective updated: Go to the door and enter');
+				} else if (stage === 2) {
+					// completed / hallway
+					taskDoorEl.classList.add('done');
+					taskDoorEl.style.opacity = 1;
+					showNotification('Objective complete: You have entered the hallway', 3000);
+					// Optionally hide objective box after a short delay
+					setTimeout(() => {
+						if (objectiveBox) objectiveBox.style.display = 'none';
+					}, 2000);
+				}
 			}
 
 			// Add item to the first available hotbar slot (icon or label)
@@ -872,18 +985,31 @@
 							} else {
 								alert(`${itemName} selected from hotbar`);
 							}
-						}, { once: false });
+						}, {
+							once: false
+						});
 						updateHotbarSelection(); // refresh selection UI if needed
-
 						// Show notification when item is added (notifying Gun/Medkit or other)
 						showNotification(`${itemName} has been added to Hotbar`);
-
+						// Check objectives: if the chest objective is active and player added an item, advance objective
+						checkObjectiveProgress();
 						return true;
 					}
 				}
 				// no free slot
 				alert('Hotbar is full!');
 				return false;
+			}
+
+			function checkObjectiveProgress() {
+				// If the player has any hotbar items and objectiveStage is 0, advance to door objective
+				let itemsCount = 0;
+				hotbarItems.forEach(slot => {
+					if (slot.dataset.item && slot.dataset.item !== '') itemsCount++;
+				});
+				if (itemsCount > 0 && objectiveStage === 0) {
+					setObjectiveStage(1);
+				}
 			}
 
 			let isHoveringChest = false;
@@ -908,7 +1034,6 @@
 					}
 				});
 			}
-
 			// Open chest when player presses "E"
 			document.addEventListener("keydown", (e) => {
 				if ((e.key === "e" || e.key === "E") && isHoveringChest && isCutsceneComplete) {
@@ -922,7 +1047,6 @@
 					chestUI.style.display = "none"; // Hide chest UI
 				});
 			}
-
 			// Logic for item selection inside the chest
 			const chestItems = document.querySelectorAll(".chest-item");
 			chestItems.forEach((item) => {
@@ -952,10 +1076,8 @@
 						// fallback: use innerText of button
 						itemName = item.innerText.trim();
 					}
-
 					// If the slot is empty do nothing
 					if (!itemName && !imgSrc) return;
-
 					// Move Gun sprite to hotbar (use imgSrc) and remove from chest
 					if (/gun/i.test(itemName) && imgSrc) {
 						const success = addItemToHotbar('Gun', imgSrc);
@@ -971,9 +1093,13 @@
 						}
 					} else if (/medkit/i.test(itemName)) {
 						// For medkit without an image, fallback to the SVG icon
-						const medkitDataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-							`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="%23b91c1c"/><rect x="18" y="26" width="28" height="12" fill="%23ffffff"/><rect x="28" y="18" width="8" height="28" fill="%23ffffff"/></svg>`
-						);
+						const medkitDataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+			<svg
+				xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+				<rect width="64" height="64" rx="8" fill="%23b91c1c"/>
+				<rect x="18" y="26" width="28" height="12" fill="%23ffffff"/>
+				<rect x="28" y="18" width="8" height="28" fill="%23ffffff"/>
+			</svg>`);
 						const success = addItemToHotbar('Medkit', medkitDataUrl);
 						if (success) {
 							item.innerHTML = ''; // remove medkit text from chest UI
@@ -983,13 +1109,11 @@
 						const success = addItemToHotbar(itemName || 'Item', imgSrc);
 						if (success) item.innerHTML = '';
 					}
-
 					// hide chest UI and any interact prompt
 					chestUI.style.display = 'none';
 					if (interactText) interactText.style.display = 'none';
 				});
 			});
-
 			// Door interaction (moved outside chestItems loop)
 			let isHoveringDoor = false;
 			// Show interaction prompt on hover
@@ -1006,10 +1130,15 @@
 			}
 			// Handle interaction via click or key press
 			function enterDoor() {
+				// If the chest objective hasn't been completed, block entry and notify
+				if (objectiveStage < 1) {
+					showNotification('You should pick up beginner items first', 2000);
+					return;
+				}
 				if (!isCutsceneComplete) return; // cannot enter during cutscene
 				if (isHoveringDoor) {
-					// Change background
-					document.body.style.backgroundImage = "url('https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/Image_20250305_180433_654.png?v=1741449517203')";
+					// Change background to a hallway image
+					document.body.style.backgroundImage = "url('https://images.unsplash.com/photo-1529400971008-f566de0e6dfc?auto=format&fit=crop&w=1400&q=80')";
 					document.body.style.backgroundSize = "cover";
 					document.body.style.backgroundPosition = "center";
 					// If there is a player DOM element move it; otherwise it's ignored
@@ -1020,6 +1149,8 @@
 						playerEl.style.transform = "translate(-50%, -50%)";
 					}
 					doorInteractText.style.display = "none";
+					// mark objective complete and advance stage
+					setObjectiveStage(2);
 				}
 			}
 			if (door) door.addEventListener("click", enterDoor);
@@ -1028,7 +1159,6 @@
 					enterDoor();
 				}
 			});
-
 			const skipButton = document.getElementById("skipButton");
 			skipButton.addEventListener("click", skipCutscene);
 			const pauseMenu = document.getElementById("pauseMenu");
@@ -1145,7 +1275,6 @@
 			const saveSettingsButton = document.getElementById("saveSettings");
 			const settingsIcon = document.getElementById("settingsIcon");
 			settingsIcon.addEventListener("click", toggleSettingsMenu);
-
 			// Movement input handling
 			document.addEventListener("keydown", (e) => {
 				// Movement Keys (Arrow keys and A/D keys)
@@ -1192,7 +1321,6 @@
 			function toggleSettingsMenu() {
 				settingsMenu.style.display = settingsMenu.style.display === "block" ? "none" : "block";
 			}
-
 			// Detect mouse position
 			document.addEventListener("mousemove", (e) => {
 				const cursorPosition = e.clientY; // Get vertical position of the mouse cursor
@@ -1237,7 +1365,6 @@
 			}
 			const baseSpeed = 5;
 			const speedBoost = 7;
-
 			// draw HUD: health and stamina bars
 			function drawHUD() {
 				const padding = 16;
@@ -1265,7 +1392,6 @@
 				ctx.fillStyle = "white";
 				ctx.font = "12px monospace";
 				ctx.fillText(`HP: ${Math.round(player.health)}/${player.maxHealth}`, hx + 6, hy + barH - 2);
-
 				// Stamina (below health)
 				const sx = padding;
 				const sy = hy + barH + 10;
@@ -1284,7 +1410,6 @@
 				ctx.fillText(`STA: ${Math.round(player.stamina)}/${player.maxStamina}`, sx + 6, sy + barH - 2);
 				ctx.restore();
 			}
-
 			// gameLoop now uses timestamp for delta time (dt) to handle stamina regen/drain reliably
 			let lastTimestamp = null;
 
@@ -1296,9 +1421,7 @@
 				if (!lastTimestamp) lastTimestamp = timestamp;
 				const dt = Math.min(0.05, ((timestamp || performance.now()) - lastTimestamp) / 1000); // clamp dt
 				lastTimestamp = timestamp || performance.now();
-
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
-
 				if (isCutsceneComplete) {
 					// Draw the grey floor after the cutscene
 					ctx.fillStyle = platform.color;
@@ -1329,6 +1452,8 @@
 						skipButton.style.display = "none";
 						// show world UI now that cutscene is over
 						showWorldUI();
+						// ensure objective starts at chest objective
+						setObjectiveStage(0);
 					}
 				} else {
 					// Movement and physics - uses dt
@@ -1346,7 +1471,6 @@
 						// spawn particles
 						spawnJumpParticles();
 					}
-
 					// stamina drain while sprinting
 					const isSprinting = keys.shift && (keys.left || keys.right) && player.stamina > 0;
 					if (isSprinting) {
@@ -1369,7 +1493,6 @@
 						}
 						sprintParticleAccumulator = 0;
 					}
-
 					player.x += player.dx;
 					player.y += player.dy;
 					if (player.y + player.height > platform.y) {
@@ -1383,16 +1506,12 @@
 					if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 					if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
 				}
-
 				// update and draw particles (do this before drawing player so particles appear behind player)
 				updateAndDrawParticles(dt);
-
 				// draw player
 				drawPlayer();
-
 				// draw HUD (health + stamina)
 				drawHUD();
-
 				requestAnimationFrame(gameLoop);
 			}
 
@@ -1410,6 +1529,8 @@
 				currentMessageIndex = cutsceneMessages.length;
 				skipButton.style.display = "none";
 				showWorldUI();
+				// ensure objective starts at chest objective
+				setObjectiveStage(0);
 			}
 
 			function restartGame() {
@@ -1438,6 +1559,9 @@
 				// reset player stats
 				player.health = player.maxHealth;
 				player.stamina = player.maxStamina;
+				// reset objective display
+				if (objectiveBox) objectiveBox.style.display = 'block';
+				setObjectiveStage(0);
 				// kick off loop
 				requestAnimationFrame(gameLoop);
 			}
@@ -1453,7 +1577,6 @@
 				audio.currentTime = 0; // Reset to the beginning of the sound
 				audio.play(); // Play the sound
 			}
-
 			// Set up event listeners for key presses
 			document.addEventListener("keydown", function(e) {
 				// Debug log for checking which key was pressed
@@ -1517,7 +1640,6 @@
 				pauseMenu.style.display = "none";
 				requestAnimationFrame(gameLoop); // Resume the game loop
 			}
-
 			// Hotbar selection support (visual)
 			let selectedItem = 1; // Default selected item
 			function updateHotbarSelection() {
@@ -1537,15 +1659,12 @@
 			});
 			// Initial selection
 			updateHotbarSelection();
-
 			// start main loop
 			requestAnimationFrame(gameLoop);
-
 			window.addEventListener("resize", () => {
 				canvas.width = window.innerWidth;
 				canvas.height = window.innerHeight;
 			});
-
 			// Detect mobile devices and show mobile controls
 			if (/Mobi|Android/i.test(navigator.userAgent)) {
 				document.getElementById("mobileControls").style.display = "flex"; // Show buttons on mobile
@@ -1636,7 +1755,6 @@
 			function loadSettings() {
 				const savedVolume = localStorage.getItem("volume");
 				const savedCutsceneProgress = localStorage.getItem("saveCutsceneProgress");
-
 				if (savedVolume !== null && volumeControl) {
 					backgroundMusicVolume = parseFloat(savedVolume);
 					volumeControl.value = backgroundMusicVolume;
@@ -1650,7 +1768,6 @@
 			}
 			// Call loadSettings when the game starts
 			loadSettings();
-
 			// Button for saving settings
 			if (saveSettingsButton) saveSettingsButton.addEventListener("click", saveSettings);
 			document.querySelectorAll(".key-button").forEach((button) => {
@@ -1697,6 +1814,9 @@
 				settingsMenu.style.display = "block";
 				rightClickMenu.style.display = "none";
 			}
+
+			// Ensure objective box starts in chest state if cutscene already complete on load
+			if (isCutsceneComplete) setObjectiveStage(0);
 		</script>
 	</body>
 </html>
