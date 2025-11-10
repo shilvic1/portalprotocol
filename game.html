@@ -554,6 +554,60 @@
 				border: 2px solid cyan;
 				font-family: "Press Start 2P", cursive;
 			}
+
+			/* Dialogue box (bottom of the screen) */
+			#dialogueBox {
+				position: fixed;
+				left: 50%;
+				bottom: 18px;
+				transform: translateX(-50%);
+				width: calc(100% - 60px);
+				max-width: 920px;
+				background: rgba(6, 10, 12, 0.88);
+				color: #fff;
+				padding: 14px;
+				border-radius: 8px;
+				border: 2px solid rgba(0,255,255,0.08);
+				z-index: 1002;
+				display: none;
+				font-family: "Press Start 2P", cursive;
+				box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+			}
+			#dialogueBox .speaker {
+				color: #9ff;
+				font-size: 12px;
+				margin-bottom: 8px;
+				display: block;
+			}
+			#dialogueBox .text {
+				color: #fff;
+				font-size: 12px;
+				min-height: 36px;
+				white-space: pre-wrap;
+			}
+			#dialogueChoices {
+				margin-top: 12px;
+				display: flex;
+				gap: 12px;
+				flex-wrap: wrap;
+			}
+			.dialogueChoice {
+				background: rgba(255,255,255,0.06);
+				color: #fff;
+				border: 1px solid rgba(255,255,255,0.06);
+				padding: 8px 10px;
+				font-size: 11px;
+				border-radius: 6px;
+				cursor: pointer;
+				flex: 1 1 auto;
+			}
+			.dialogueChoice:hover, .dialogueChoice:focus {
+				background: rgba(0,255,255,0.08);
+				outline: none;
+			}
+
+			/* small helper for speaker emphasis */
+			#dialogueBox .speaker strong { color: #fff; }
 		</style>
 		<button id="skipButton">
 			<i class="fas fa-forward"></i> Skip Cutscene </button>
@@ -569,6 +623,13 @@
 
 		<!-- Hallway overlay (shown when entering hallway) -->
 		<div id="hallwayOverlay"><div class="label">Hallway</div></div>
+
+		<!-- Dialogue box at bottom (hidden by default) -->
+		<div id="dialogueBox" role="dialog" aria-modal="false" aria-live="polite">
+			<span class="speaker" id="dialogueSpeaker"></span>
+			<div class="text" id="dialogueText"></div>
+			<div id="dialogueChoices" aria-label="Dialogue choices"></div>
+		</div>
 
 		<!-- Chest UI -->
 		<div id="chestUI" style="
@@ -789,6 +850,13 @@
 			const objectiveTextEl = document.getElementById("objectiveText");
 			const hallwayOverlay = document.getElementById("hallwayOverlay");
 
+			// Dialogue elements
+			const dialogueBox = document.getElementById("dialogueBox");
+			const dialogueSpeaker = document.getElementById("dialogueSpeaker");
+			const dialogueText = document.getElementById("dialogueText");
+			const dialogueChoices = document.getElementById("dialogueChoices");
+			let dialogueShown = false; // keep track if hallway dialogue has shown
+
 			// Objectives state (from the requested code)
 			// phases: 'pickupChest' -> 'goDoor' -> 'hallway'
 			let objectivePhase = 'pickupChest';
@@ -918,6 +986,62 @@
 						if (notificationEl) notificationEl.textContent = '';
 					}, 360);
 				}, duration);
+			}
+
+			// Dialogue utilities
+			function showDialogueBox() {
+				if (!dialogueBox) return;
+				dialogueBox.style.display = 'block';
+			}
+			function hideDialogueBox() {
+				if (!dialogueBox) return;
+				dialogueBox.style.display = 'none';
+				dialogueSpeaker.textContent = '';
+				dialogueText.textContent = '';
+				dialogueChoices.innerHTML = '';
+			}
+
+			// Typewriter effect used for dialogue (kept separate from cutscene typing)
+			function typeWriter(targetEl, text, speed = 18, cb) {
+				targetEl.textContent = '';
+				let i = 0;
+				const framed = () => {
+					if (i <= text.length) {
+						targetEl.textContent = text.slice(0, i);
+						i++;
+						setTimeout(framed, speed);
+					} else {
+						if (cb) cb();
+					}
+				};
+				framed();
+			}
+
+			// Create a dialogue line and show choices when provided
+			function showDialogue(speaker, text, onComplete) {
+				if (!dialogueBox) return;
+				showDialogueBox();
+				dialogueSpeaker.textContent = speaker;
+				typeWriter(dialogueText, text, 18, onComplete);
+			}
+
+			// Show choices as buttons
+			function showChoices(choices) {
+				if (!dialogueChoices) return;
+				dialogueChoices.innerHTML = '';
+				choices.forEach((c, idx) => {
+					const btn = document.createElement('button');
+					btn.className = 'dialogueChoice';
+					btn.textContent = c.label;
+					btn.setAttribute('data-choice-index', idx);
+					btn.addEventListener('click', () => {
+						// clear choices immediately to prevent double clicks
+						dialogueChoices.innerHTML = '';
+						// call handler
+						if (typeof c.onSelect === 'function') c.onSelect();
+					});
+					dialogueChoices.appendChild(btn);
+				});
 			}
 
 			// Add item to the first available hotbar slot (icon or label)
@@ -1159,8 +1283,72 @@
 					// small delay then hide overlay pointer events so gameplay continues
 					setTimeout(() => {
 						hallwayOverlay.style.display = 'none';
+						// show the hallway dialogue once (only the first time)
+						if (!dialogueShown) {
+							dialogueShown = true;
+							showHallwayDialogueSequence();
+						}
 					}, 1200);
 				}, 600);
+			}
+
+			// Hallway dialogue sequence
+			function showHallwayDialogueSequence() {
+				// initial Dave line
+				showDialogue("Dave (Supervisor):", "You there! The Rift’s destabilizing—automated systems are down. We need a manual override, NOW!", () => {
+					// after initial line is typed out, present player choices
+					const choices = [
+						{
+							label: "What's happening? I just got here!",
+							onSelect: () => {
+								// show player's line then Dave's explanation
+								showDialogue("Player:", "What's happening? I just got here!", () => {
+									showDialogue("Dave (Supervisor):", "The Rift's field is fluctuating — spatial stability nodes are tripping. If it collapses it'll tear the lab apart. We need to trace its source in the logs and perform a manual override.", () => {
+										// update objective to search logs and provide short tutorial hint
+										setObjective('Search for terminal logs (tutorial on movement and interaction).');
+										showNotification('Objective Updated: Search for terminal logs', 2800);
+										// small movement/interaction tutorial hint
+										setTimeout(() => {
+											showNotification('Hint: Use Arrow keys or A/D to move. Press E to interact with terminals.', 3500);
+										}, 500);
+										// leave dialogue visible with a continue / close button
+										showDialogue("Dave (Supervisor):", "Head to the terminals — check the logs and follow the instructions.", () => {
+											const contChoices = [{ label: "Understood", onSelect: () => hideDialogueBox() }];
+											showChoices(contChoices);
+										});
+									});
+								});
+							}
+						},
+						{
+							label: "How do I fix it?",
+							onSelect: () => {
+								showDialogue("Player:", "How do I fix it?", () => {
+									showDialogue("Dave (Supervisor):", "Start with the terminal logs. They should show the anomaly's origin and the correct override steps. Get me the logs and I'll talk you through it.", () => {
+										setObjective('Search for terminal logs (tutorial on movement and interaction).');
+										showNotification('Objective Updated: Search for terminal logs', 2800);
+										const contChoices = [{ label: "On my way", onSelect: () => hideDialogueBox() }];
+										showChoices(contChoices);
+									});
+								});
+							}
+						},
+						{
+							label: "Can't we just shut it off?",
+							onSelect: () => {
+								showDialogue("Player:", "Can't we just shut it off?", () => {
+									showDialogue("Dave (Supervisor):", "If only it were that easy. Power cycling without the logs risks an uncontrolled collapse. We need a manual override keyed to the logs.", () => {
+										setObjective('Search for terminal logs (tutorial on movement and interaction).');
+										showNotification('Objective Updated: Search for terminal logs', 2800);
+										const contChoices = [{ label: "Alright", onSelect: () => hideDialogueBox() }];
+										showChoices(contChoices);
+									});
+								});
+							}
+						}
+					];
+					showChoices(choices);
+				});
 			}
 
 			// Note: updateHotbarSelection already existed; extend it so hotbar appears if items exist
