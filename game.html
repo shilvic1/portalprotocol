@@ -503,23 +503,21 @@
 				position: fixed;
 				top: 22px;
 				left: 22px;
-				background: rgba(0, 0, 0, 0.7);
+				background: rgba(0,0,0,0.7);
 				color: cyan;
 				padding: 10px 14px;
 				border-radius: 8px;
-				border: 2px solid rgba(0, 255, 255, 0.15);
+				border: 2px solid rgba(0,255,255,0.15);
 				font-family: "Press Start 2P", cursive;
 				font-size: 12px;
 				z-index: 1001;
 				max-width: 360px;
 			}
-
 			#objective .title {
 				color: #fff;
 				font-size: 10px;
 				margin-bottom: 6px;
 			}
-
 			#objective .text {
 				color: cyan;
 				font-size: 12px;
@@ -527,7 +525,7 @@
 
 			/* Door highlight when objective directs player to it */
 			.door-highlight {
-				box-shadow: 0 0 18px rgba(0, 255, 255, 0.85);
+				box-shadow: 0 0 18px rgba(0,255,255,0.85);
 				transition: box-shadow 0.35s ease;
 				transform: translateZ(0);
 			}
@@ -543,7 +541,6 @@
 				z-index: 900;
 				display: none;
 			}
-
 			#hallwayOverlay .label {
 				position: absolute;
 				top: 50%;
@@ -551,7 +548,7 @@
 				transform: translate(-50%, -50%);
 				color: white;
 				font-size: 28px;
-				background: rgba(0, 0, 0, 0.6);
+				background: rgba(0,0,0,0.6);
 				padding: 12px 18px;
 				border-radius: 8px;
 				border: 2px solid cyan;
@@ -570,76 +567,70 @@
 				color: #fff;
 				padding: 14px;
 				border-radius: 8px;
-				border: 2px solid rgba(0, 255, 255, 0.08);
+				border: 2px solid rgba(0,255,255,0.08);
 				z-index: 1002;
 				display: none;
 				font-family: "Press Start 2P", cursive;
-				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+				box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 			}
-
 			#dialogueBox .speaker {
 				color: #9ff;
 				font-size: 12px;
 				margin-bottom: 8px;
 				display: block;
 			}
-
 			#dialogueBox .text {
 				color: #fff;
 				font-size: 12px;
 				min-height: 36px;
 				white-space: pre-wrap;
 			}
-
 			#dialogueChoices {
 				margin-top: 12px;
 				display: flex;
 				gap: 12px;
 				flex-wrap: wrap;
 			}
-
 			.dialogueChoice {
-				background: rgba(255, 255, 255, 0.06);
+				background: rgba(255,255,255,0.06);
 				color: #fff;
-				border: 1px solid rgba(255, 255, 255, 0.06);
+				border: 1px solid rgba(255,255,255,0.06);
 				padding: 8px 10px;
 				font-size: 11px;
 				border-radius: 6px;
 				cursor: pointer;
 				flex: 1 1 auto;
 			}
-
-			.dialogueChoice:hover,
-			.dialogueChoice:focus {
-				background: rgba(0, 255, 255, 0.08);
+			.dialogueChoice:hover, .dialogueChoice:focus {
+				background: rgba(0,255,255,0.08);
 				outline: none;
 			}
 
 			/* small helper for speaker emphasis */
-			#dialogueBox .speaker strong {
-				color: #fff;
-			}
+			#dialogueBox .speaker strong { color: #fff; }
 		</style>
 		<button id="skipButton">
 			<i class="fas fa-forward"></i> Skip Cutscene </button>
 		<canvas id="gameCanvas" width="664" height="492"></canvas>
 		<!-- Notification container -->
 		<div id="notification" aria-live="polite" role="status" style="display:block;"></div>
+
 		<!-- Objective UI (top-left) -->
 		<div id="objective" aria-live="polite" role="status" style="display:block;">
 			<div class="title">Objective</div>
 			<div class="text" id="objectiveText">Collect the beginner items from the chest.</div>
 		</div>
+
 		<!-- Hallway overlay (shown when entering hallway) -->
-		<div id="hallwayOverlay">
-			<div class="label">Hallway</div>
-		</div>
+		<div id="hallwayOverlay"><div class="label">Hallway</div></div>
+
 		<!-- Dialogue box at bottom (hidden by default) -->
 		<div id="dialogueBox" role="dialog" aria-modal="false" aria-live="polite">
 			<span class="speaker" id="dialogueSpeaker"></span>
 			<div class="text" id="dialogueText"></div>
 			<div id="dialogueChoices" aria-label="Dialogue choices"></div>
 		</div>
+
 		<!-- Chest UI -->
 		<div id="chestUI" style="
         display: none;
@@ -658,7 +649,7 @@
 			<div style="display: grid; grid-template-columns: repeat(3, 60px); gap: 10px">
 				<button class="chest-item">
 					<div class="item-content">
-						<img src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/4e707c54-a28f-454b-852f-ae825ca9f20f.image.png?v=1743862665001" alt="Gun" />
+						<img src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/4e707c54-a28f-454b-852f-ae825ca9f20f.image.png?v=1743862665001"  alt="Gun" />
 					</div>
 				</button>
 				<!-- Medkit text replaced with the provided image filename -->
@@ -682,36 +673,38 @@
           border-radius: 5px;
         "> Close </button>
 		</div>
+
 		<!-- Terminal UI (popups for logs) -->
-		<div id="terminalUI" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:380px; max-width:90vw; background:rgba(3,6,10,0.92); color:#8ff; padding:18px; border-radius:10px; border:2px solid rgba(0,255,255,0.12); z-index:1005; font-family:'Press Start 2P',cursive;">
-			<div style="font-size:12px; color:#fff; margin-bottom:10px;">
-				<strong id="terminalTitle">LOG</strong>
-			</div>
-			<div id="terminalContent" style="font-size:12px; color:#9ff; min-height:48px; white-space:pre-wrap;"></div>
-			<div style="margin-top:12px; display:flex; gap:8px;">
-				<button id="terminalClose" style="flex:1; padding:10px; background:#28a745; color:#fff; border-radius:6px; border:none;">Close</button>
-			</div>
-		</div>
-		<!-- Central Console UI -->
-		<div id="consoleUI" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:420px; max-width:95vw; background:rgba(6,10,12,0.96); color:#bff; padding:18px; border-radius:10px; border:2px solid rgba(255,100,100,0.06); z-index:1006; font-family:'Press Start 2P',cursive;">
-			<div style="font-size:12px; color:#fff; margin-bottom:8px;">
-				<strong>OVERRIDE CONSOLE</strong>
-			</div>
-			<div id="consoleDialogue" style="font-size:12px; color:#9ff; min-height:36px; margin-bottom:8px;"></div>
-			<div id="consoleChoices" style="display:flex; gap:8px; margin-bottom:8px;">
-				<button class="consoleChoiceBtn" data-val="375" style="flex:1; padding:8px; border-radius:6px; border:none; cursor:pointer;">375</button>
-				<button class="consoleChoiceBtn" data-val="190" style="flex:1; padding:8px; border-radius:6px; border:none; cursor:pointer;">190</button>
-				<button class="consoleChoiceBtn" data-val="770" style="flex:1; padding:8px; border-radius:6px; border:none; cursor:pointer;">770</button>
-				<button class="consoleChoiceBtn" data-val="583" style="flex:1; padding:8px; border-radius:6px; border:none; cursor:pointer;">583</button>
-			</div>
-			<div style="display:flex; gap:8px; margin-bottom:8px;">
-				<input id="manualCodeInput" type="text" placeholder="Enter code..." style="flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.08); font-family:monospace;">
-				<button id="manualSubmit" style="padding:8px 12px; border-radius:6px; border:none; background:#3498db; color:#fff; cursor:pointer;">Submit</button>
-			</div>
-			<div style="display:flex; gap:8px;">
-				<button id="consoleCancel" style="flex:1; padding:8px; border-radius:6px; border:none; background:#777; color:#fff; cursor:pointer;">Cancel</button>
-			</div>
-		</div>
+<div id="terminalUI" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:380px; max-width:90vw; background:rgba(3,6,10,0.92); color:#8ff; padding:18px; border-radius:10px; border:2px solid rgba(0,255,255,0.12); z-index:1005; font-family:'Press Start 2P',cursive;">
+  <div style="font-size:12px; color:#fff; margin-bottom:10px;"><strong id="terminalTitle">LOG</strong></div>
+  <div id="terminalContent" style="font-size:12px; color:#9ff; min-height:48px; white-space:pre-wrap;"></div>
+  <div style="margin-top:12px; display:flex; gap:8px;">
+    <button id="terminalClose" style="flex:1; padding:10px; background:#28a745; color:#fff; border-radius:6px; border:none;">Close</button>
+  </div>
+</div>
+
+<!-- Central Console UI -->
+<div id="consoleUI" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:420px; max-width:95vw; background:rgba(6,10,12,0.96); color:#bff; padding:18px; border-radius:10px; border:2px solid rgba(255,100,100,0.06); z-index:1006; font-family:'Press Start 2P',cursive;">
+  <div style="font-size:12px; color:#fff; margin-bottom:8px;"><strong>OVERRIDE CONSOLE</strong></div>
+  <div id="consoleDialogue" style="font-size:12px; color:#9ff; min-height:36px; margin-bottom:8px;"></div>
+
+  <div id="consoleChoices" style="display:flex; gap:8px; margin-bottom:8px;">
+    <button class="consoleChoiceBtn" data-val="375" style="flex:1; padding:8px; border-radius:6px; border:none; cursor:pointer;">375</button>
+    <button class="consoleChoiceBtn" data-val="190" style="flex:1; padding:8px; border-radius:6px; border:none; cursor:pointer;">190</button>
+    <button class="consoleChoiceBtn" data-val="770" style="flex:1; padding:8px; border-radius:6px; border:none; cursor:pointer;">770</button>
+    <button class="consoleChoiceBtn" data-val="583" style="flex:1; padding:8px; border-radius:6px; border:none; cursor:pointer;">583</button>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:8px;">
+    <input id="manualCodeInput" type="text" placeholder="Enter code..." style="flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.08); font-family:monospace;">
+    <button id="manualSubmit" style="padding:8px 12px; border-radius:6px; border:none; background:#3498db; color:#fff; cursor:pointer;">Submit</button>
+  </div>
+
+  <div style="display:flex; gap:8px;">
+    <button id="consoleCancel" style="flex:1; padding:8px; border-radius:6px; border:none; background:#777; color:#fff; cursor:pointer;">Cancel</button>
+  </div>
+</div>
+
 		<!-- chest and door are hidden during cutscene; will be shown after cutscene completes -->
 		<img id="chest" src="https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/metal%20chest.png?v=1742944087746" alt="Metal Chest" style="display:none" />
 		<p id="interact-text" style="
@@ -843,7 +836,14 @@
 				equipped: null
 			};
 			// Updated cutscene messages
-			const cutsceneMessages = ["Initializing Scan...", "New Id Detected- rift_Techinican_0_167.", "Welcome, KAI WALKER", "Welcome to Drt Inc, Dimensional Rift Technologies Inc.", "You are the newest Rift Technician!", "Your job is monitor, maintain and stabilize Rifts to prevent dimensional collapse.", "Do you think you can complete the portal protocol?", ];
+			const cutsceneMessages = 
+			["Initializing Scan...",
+			 "New Id Detected- rift_Techinican_0_167.", 
+			 "Welcome, KAI WALKER",
+			 "Welcome to Drt Inc, Dimensional Rift Technologies Inc.",
+			 "You are the newest Rift Technician!", 
+			 "Your job is monitor, maintain and stabilize Rifts to prevent dimensional collapse.",
+			 "Do you think you can complete the portal protocol?", ];
 			const platform = {
 				x: 0,
 				y: canvas.height - 50,
@@ -888,20 +888,24 @@
 			const notificationEl = document.getElementById("notification");
 			const objectiveTextEl = document.getElementById("objectiveText");
 			const hallwayOverlay = document.getElementById("hallwayOverlay");
+
 			// Dialogue elements
 			const dialogueBox = document.getElementById("dialogueBox");
 			const dialogueSpeaker = document.getElementById("dialogueSpeaker");
 			const dialogueText = document.getElementById("dialogueText");
 			const dialogueChoices = document.getElementById("dialogueChoices");
 			let dialogueShown = false; // keep track if hallway dialogue has shown
+
 			// Objectives state (from the requested code)
 			// phases: 'pickupChest' -> 'goDoor' -> 'hallway'
 			let objectivePhase = 'pickupChest';
 			let chestItemsPicked = 0;
 			const chestItemsRequired = 2; // how many items to pick up before door objective activates
+
 			function setObjective(text) {
 				if (objectiveTextEl) objectiveTextEl.textContent = text;
 			}
+
 			// --- Particle system ---
 			const particles = [];
 			const particleConfig = {
@@ -983,6 +987,7 @@
 				}
 			}
 			// --- end particle system ---
+
 			// Helper functions to show/hide world UI (chest, door, hotbar) based on cutscene state
 			function showWorldUI() {
 				if (chest) chest.style.display = "block";
@@ -1021,12 +1026,12 @@
 					}, 360);
 				}, duration);
 			}
+
 			// Dialogue utilities
 			function showDialogueBox() {
 				if (!dialogueBox) return;
 				dialogueBox.style.display = 'block';
 			}
-
 			function hideDialogueBox() {
 				if (!dialogueBox) return;
 				dialogueBox.style.display = 'none';
@@ -1034,6 +1039,7 @@
 				dialogueText.textContent = '';
 				dialogueChoices.innerHTML = '';
 			}
+
 			// Typewriter effect used for dialogue (kept separate from cutscene typing)
 			function typeWriter(targetEl, text, speed = 18, cb) {
 				targetEl.textContent = '';
@@ -1049,6 +1055,7 @@
 				};
 				framed();
 			}
+
 			// Create a dialogue line and show choices when provided
 			function showDialogue(speaker, text, onComplete) {
 				if (!dialogueBox) return;
@@ -1056,6 +1063,7 @@
 				dialogueSpeaker.textContent = speaker;
 				typeWriter(dialogueText, text, 18, onComplete);
 			}
+
 			// Show choices as buttons
 			function showChoices(choices) {
 				if (!dialogueChoices) return;
@@ -1074,6 +1082,7 @@
 					dialogueChoices.appendChild(btn);
 				});
 			}
+
 			// Add item to the first available hotbar slot (icon or label)
 			function addItemToHotbar(itemName, imgSrc = null) {
 				for (let i = 0; i < hotbarItems.length; i++) {
@@ -1124,6 +1133,7 @@
 				alert('Hotbar is full!');
 				return false;
 			}
+
 			// Called after successful pickup of chest items to update objective progression.
 			function chestItemPicked() {
 				chestItemsPicked++;
@@ -1146,6 +1156,7 @@
 					door.classList.remove('door-highlight');
 				}
 			}
+
 			let isHoveringChest = false;
 			// Show "Press E to Interact" when hovering over the chest
 			if (chest) {
@@ -1229,13 +1240,12 @@
 					} else if (/medkit/i.test(itemName)) {
 						// For medkit without an image, fallback to the SVG icon
 						const medkitDataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-			
-				<svg
-					xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-					<rect width="64" height="64" rx="8" fill="%23b91c1c"/>
-					<rect x="18" y="26" width="28" height="12" fill="%23ffffff"/>
-					<rect x="28" y="18" width="8" height="28" fill="%23ffffff"/>
-				</svg>`);
+			<svg
+				xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+				<rect width="64" height="64" rx="8" fill="%23b91c1c"/>
+				<rect x="18" y="26" width="28" height="12" fill="%23ffffff"/>
+				<rect x="28" y="18" width="8" height="28" fill="%23ffffff"/>
+			</svg>`);
 						success = addItemToHotbar('Medkit', medkitDataUrl);
 						if (success) {
 							item.innerHTML = ''; // remove medkit text from chest UI
@@ -1274,6 +1284,7 @@
 					attemptEnterDoor();
 				});
 			}
+
 			// Open door when player presses "E"
 			document.addEventListener("keydown", (e) => {
 				if ((e.key === "e" || e.key === "E") && isHoveringDoor && isCutsceneComplete) {
@@ -1320,475 +1331,458 @@
 				}, 600);
 			}
 			/* ======= Replaced hallway + terminal / console system ======= */
-			/* Hallway terminals and console state */
-			let hallwayTerminals = [];
-			let logsFoundCount = 0;
-			let consoleSpawnX = null;
-			let consoleActive = false;
-			let consoleOpened = false;
-			let glitchModeActive = false;
-			/* Helper to create terminal "world" positions relative to hallway spawn */
-			function setupHallwayTerminals() {
-				// Define three terminal x offsets from the hallway spawn (player start in hallway)
-				const spawnX = canvas.width / 2; // hallway spawn used earlier
-				hallwayTerminals = [{
-					id: 't1',
-					x: spawnX - 300,
-					found: false,
-					title: 'LOG 1',
-					content: 'First code digit: 3'
-				}, {
-					id: 't2',
-					x: spawnX + 0,
-					found: false,
-					title: 'LOG 2',
-					content: 'Second code digit: 7'
-				}, {
-					id: 't3',
-					x: spawnX + 300,
-					found: false,
-					title: 'LOG 3',
-					content: 'Last digit: 5'
-				}];
-				// console sits further down the hallway
-				consoleSpawnX = spawnX + 700;
-				logsFoundCount = 0;
-				consoleActive = false;
-				consoleOpened = false;
-			}
-			/* small HUD marker: draw terminal markers when in hallway (optional visual aid) */
-			function drawHallwayMarkers(ctxRef) {
-				if (objectivePhase !== 'hallway') return;
-				ctxRef.save();
-				hallwayTerminals.forEach(t => {
-					if (!t.found) {
-						ctxRef.fillStyle = 'rgba(180,255,255,0.08)';
-						ctxRef.fillRect(t.x - player.x + player.x + player.width / 2 - 8, platform.y - 80, 16, 40);
-						ctxRef.fillStyle = '#66ddff';
-						ctxRef.font = '10px monospace';
-						const labelX = (t.x - player.x) + player.x + player.width / 2 - 12;
-						ctxRef.fillText('TERM', labelX, platform.y - 50);
-					}
-				});
-				// console marker
-				if (!consoleActive) {
-					// don't draw until logs found
-				} else if (!consoleOpened) {
-					ctxRef.fillStyle = 'rgba(255,200,150,0.06)';
-					ctxRef.fillRect(consoleSpawnX - player.x + player.x + player.width / 2 - 12, platform.y - 90, 24, 52);
-					ctxRef.fillStyle = '#ffcc66';
-					ctxRef.font = '10px monospace';
-					const labelX = (consoleSpawnX - player.x) + player.x + player.width / 2 - 16;
-					ctxRef.fillText('CON', labelX, platform.y - 55);
-				}
-				ctxRef.restore();
-			}
-			/* Replace enterHallway() */
-			function enterHallway() {
-				// Mark objective
-				objectivePhase = 'hallway';
-				setObjective('Objective: Find the override logs in the hallway. (0/3)');
-				showNotification('Entering hallway.', 1600);
-				highlightDoor(false);
-				// visually transition to hallway
-				hallwayOverlay.style.display = 'block';
-				setTimeout(() => {
-					hideWorldUI();
-					player.x = canvas.width / 2;
-					player.y = canvas.height / 2 - 30;
-					canvas.style.background = '#222';
-					setupHallwayTerminals(); // spawn terminals positions & console location
-					setTimeout(() => {
-						hallwayOverlay.style.display = 'none';
-						if (!dialogueShown) {
-							dialogueShown = true;
-							showHallwayDialogueSequence();
-						}
-					}, 1200);
-				}, 600);
-			}
-			/* show Hallway dialogue (replaces existing) */
-			function showHallwayDialogueSequence() {
-				// Dave's urgent line then the choices that lead to the log objective (preserves previous choices)
-				showDialogue("Dave (Supervisor):", "You there! The Rift’s destabilizing, automated systems are down. We need a manual override, NOW!", () => {
-					const choices = [{
-						label: "What's happening? I just got here!",
-						onSelect: () => {
-							showDialogue("Player:", "What's happening? I just got here!", () => {
-								showDialogue("Dave (Supervisor):", "The Rift's field is fluctuating — spatial stability nodes are tripping. If it collapses it'll tear the lab apart. We need to trace its source in the logs and perform a manual override.", () => {
-									setObjective('Objective: Search for terminal logs (0/3).');
-									showNotification('Objective Updated: Search for terminal logs', 2800);
-									setTimeout(() => {
-										showNotification('Hint: Move near a terminal and press E to interact.', 3500);
-									}, 500);
-									showDialogue("Dave (Supervisor):", "Head to the terminals — check the logs and follow the instructions.", () => {
-										const contChoices = [{
-											label: "Understood",
-											onSelect: () => hideDialogueBox()
-										}];
-										showChoices(contChoices);
-									});
-								});
-							});
-						}
-					}, {
-						label: "How do I fix it?",
-						onSelect: () => {
-							showDialogue("Player:", "How do I fix it?", () => {
-								showDialogue("Dave (Supervisor):", "Start with the terminal logs. They should show the anomaly's origin and the correct override steps. Get me the logs and I'll talk you through it.", () => {
-									setObjective('Objective: Search for terminal logs (0/3).');
-									showNotification('Objective Updated: Search for terminal logs', 2800);
-									const contChoices = [{
-										label: "On my way",
-										onSelect: () => hideDialogueBox()
-									}];
-									showChoices(contChoices);
-								});
-							});
-						}
-					}, {
-						label: "Can't we just shut it off?",
-						onSelect: () => {
-							showDialogue("Player:", "Can't we just shut it off?", () => {
-								showDialogue("Dave (Supervisor):", "If only it were that easy. Power cycling without the logs risks an uncontrolled collapse. We need a manual override keyed to the logs.", () => {
-									setObjective('Objective: Search for terminal logs (0/3).');
-									showNotification('Objective Updated: Search for terminal logs', 2800);
-									const contChoices = [{
-										label: "Alright",
-										onSelect: () => hideDialogueBox()
-									}];
-									showChoices(contChoices);
-								});
-							});
-						}
-					}];
-					showChoices(choices);
-				});
-			}
-			/* Interaction: use 'E' near terminals / console */
-			let currentNearbyTerminal = null;
-			let nearbyConsole = false;
-			document.addEventListener("keydown", (e) => {
-				if ((e.key === "e" || e.key === "E") && objectivePhase === 'hallway') {
-					// check proximity to any terminal
-					currentNearbyTerminal = null;
-					nearbyConsole = false;
-					for (let t of hallwayTerminals) {
-						const dx = Math.abs(player.x - t.x);
-						const dy = Math.abs((player.y + player.height) - platform.y);
-						if (dx < 60 && dy < 40 && !t.found) {
-							currentNearbyTerminal = t;
-							break;
-						}
-					}
-					// check console proximity (only after logs found)
-					if (logsFoundCount >= 3 && !consoleOpened) {
-						const dxC = Math.abs(player.x - consoleSpawnX);
-						const dyC = Math.abs((player.y + player.height) - platform.y);
-						if (dxC < 80 && dyC < 50) nearbyConsole = true;
-					}
-					if (currentNearbyTerminal) {
-						openTerminal(currentNearbyTerminal.id);
-					} else if (nearbyConsole) {
-						openConsoleUI();
-					} else {
-						showNotification('Nothing to interact with here.', 900);
-					}
-				}
-			});
-			/* Terminal UI logic */
-			const terminalUI = document.getElementById('terminalUI');
-			const terminalTitle = document.getElementById('terminalTitle');
-			const terminalContent = document.getElementById('terminalContent');
-			const terminalClose = document.getElementById('terminalClose');
 
-			function openTerminal(id) {
-				if (glitchModeActive) return;
-				const t = hallwayTerminals.find(x => x.id === id);
-				if (!t || t.found) return;
-				terminalTitle.textContent = t.title;
-				terminalContent.textContent = t.content;
-				terminalUI.style.display = 'block';
-				// lock gameplay briefly
-				showNotification(`${t.title} accessed`, 1400);
-				// mark as found when closed
-				terminalClose.onclick = () => {
-					terminalUI.style.display = 'none';
-					if (!t.found) {
-						t.found = true;
-						logsFoundCount++;
-						setObjective(`Objective: Find the override logs (${logsFoundCount}/3).`);
-						showNotification(`Log acquired (${logsFoundCount}/3)`, 1400);
-						if (logsFoundCount >= 3) {
-							// activate console
-							consoleActive = true;
-							setObjective('Objective: Return to the Central Console.');
-							showNotification('All logs found. Head to the Central Console!', 2200);
-							// small Dave line trigger
-							showDialogue("Dave (Supervisor):", "Good work! Head to the central override console!", () => {
-								const cont = [{
-									label: "On my way",
-									onSelect: () => hideDialogueBox()
-								}];
-								showChoices(cont);
-							});
-						}
-					}
-				};
-			}
-			/* Console UI logic */
-			const consoleUI = document.getElementById('consoleUI');
-			const consoleDialogue = document.getElementById('consoleDialogue');
-			const consoleChoices = document.getElementById('consoleChoices');
-			const manualInput = document.getElementById('manualCodeInput');
-			const manualSubmit = document.getElementById('manualSubmit');
-			const consoleCancel = document.getElementById('consoleCancel');
+/* Hallway terminals and console state */
+let hallwayTerminals = [];
+let logsFoundCount = 0;
+let consoleSpawnX = null;
+let consoleActive = false;
+let consoleOpened = false;
+let glitchModeActive = false;
 
-			function openConsoleUI() {
-				if (glitchModeActive) return;
-				if (!consoleActive) {
-					showNotification('You need all logs first.', 1500);
-					return;
-				}
-				consoleOpened = true;
-				consoleUI.style.display = 'block';
-				consoleDialogue.textContent = "Dave: This is it! Enter the override code before the Rift destabilizes!";
-				// hook choice buttons
-				document.querySelectorAll('.consoleChoiceBtn').forEach(btn => {
-					btn.onclick = () => {
-						evaluateConsoleEntry(btn.getAttribute('data-val'));
-					};
-				});
-				manualSubmit.onclick = () => {
-					const val = manualInput.value.trim();
-					evaluateConsoleEntry(val);
-				};
-				consoleCancel.onclick = () => {
-					consoleUI.style.display = 'none';
-					showNotification('Console closed.', 900);
-				};
-			}
-			/* Evaluate console entry */
-			function evaluateConsoleEntry(val) {
-				if (!val) {
-					showNotification('Enter a code or pick one of the options.', 1400);
-					return;
-				}
-				// normalize
-				const code = String(val).replace(/\s+/g, '');
-				if (code === '375') {
-					// success
-					consoleUI.style.display = 'none';
-					showNotification('Override accepted — stabilizing rift...', 2200);
-					// Dave success line and advance
-					showDialogue("Dave (Supervisor):", "You did it! Welcome to DRT, rookie.", () => {
-						// flag to proceed to next chapter - you'll want to hook this into your level loading
-						// Example: set a variable and call nextChapter()
-						window.nextChapterReady = true;
-						// optionally call a function to proceed; adjust to your project flow
-					});
-				} else {
-					// wrong code -> randomized fail outcome (three types)
-					consoleUI.style.display = 'none';
-					triggerWrongCodeOutcome();
-				}
-			}
-			/* Wrong-code outcomes (randomized among three behaviors) */
-			function triggerWrongCodeOutcome() {
-				// small random pick: 40% immediate glitch, 40% explosion cutscene then glitch, 20% fade-to-glitch
-				const r = Math.random();
-				if (r < 0.4) {
-					immediateGlitch();
-				} else if (r < 0.8) {
-					explosionThenGlitch();
-				} else {
-					fadeThenGlitch();
-				}
-			}
-			/* Outcome 1: Immediate glitch (instant distortion + load glitch mode) */
-			function immediateGlitch() {
-				showNotification('Code rejected — spatial destabilization!', 1800);
-				// quick visual: apply CSS filter to canvas + add scanline overlay
-				const overlay = document.createElement('div');
-				overlay.id = 'glitchOverlay';
-				overlay.style.position = 'fixed';
-				overlay.style.top = '0';
-				overlay.style.left = '0';
-				overlay.style.width = '100%';
-				overlay.style.height = '100%';
-				overlay.style.pointerEvents = 'none';
-				overlay.style.zIndex = '2000';
-				overlay.style.backdropFilter = 'contrast(120%) saturate(80%)';
-				overlay.style.mixBlendMode = 'screen';
-				overlay.style.background = 'repeating-linear-gradient(180deg, rgba(255,255,255,0.02) 0px, rgba(0,0,0,0.02) 2px)';
-				document.body.appendChild(overlay);
-				// apply a short shake and then enter glitch mode
-				canvas.style.transition = 'filter 0.3s';
-				canvas.style.filter = 'grayscale(0.7) hue-rotate(40deg) contrast(140%)';
-				glitchModeActive = true;
-				// small delay for effect, then fully enable glitch mode state
-				setTimeout(() => {
-					// leave visual glitch running; set a global flag the rest of the game can use
-					showNotification('Pulled into a broken dimension...', 2000);
-					// (Optional) you can call a function to switch to glitch-level behavior here:
-					if (typeof enterGlitchReality === 'function') enterGlitchReality('instant');
-				}, 600);
-			}
-			/* Outcome 2: Explosion cutscene -> glitch */
-			function explosionThenGlitch() {
-				// red flash + alarm sound and camera shake
-				showNotification('RIFT OVERLOAD! EVACUATE!', 1800);
-				// flash screen
-				const flash = document.createElement('div');
-				flash.style.position = 'fixed';
-				flash.style.inset = '0';
-				flash.style.background = 'radial-gradient(circle at 50% 40%, rgba(255,120,80,0.95), rgba(0,0,0,0.2))';
-				flash.style.zIndex = '2200';
-				flash.style.pointerEvents = 'none';
-				document.body.appendChild(flash);
-				// optional alarm sound if you want (use existing audio system if present)
-				try {
-					const alarm = new Audio('https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/alien-siren.mp3?v=1743999999999');
-					alarm.volume = 0.9;
-					alarm.play().catch(() => {});
-					setTimeout(() => {
-						alarm.pause();
-					}, 2100);
-				} catch (e) {}
-				// briefly shake canvas
-				const orig = canvas.style.transform || '';
-				canvas.style.transition = 'transform 0.2s';
-				canvas.style.transform = 'translateX(6px) rotate(0.8deg)';
-				setTimeout(() => {
-					canvas.style.transform = 'translateX(-6px) rotate(-0.6deg)';
-				}, 120);
-				setTimeout(() => {
-					canvas.style.transform = orig;
-				}, 360);
-				// after dramatic pause, switch to glitch overlay
-				setTimeout(() => {
-					document.body.removeChild(flash);
-					// reuse immediateGlitch visuals
-					immediateGlitch();
-					if (typeof enterGlitchReality === 'function') enterGlitchReality('explosion');
-				}, 900);
-			}
-			/* Outcome 3: Fade to black -> glitch */
-			function fadeThenGlitch() {
-				const f = document.createElement('div');
-				f.style.position = 'fixed';
-				f.style.inset = '0';
-				f.style.background = 'black';
-				f.style.opacity = '0';
-				f.style.zIndex = '2300';
-				f.style.transition = 'opacity 0.9s';
-				document.body.appendChild(f);
-				setTimeout(() => {
-					f.style.opacity = '1';
-				}, 20);
-				setTimeout(() => {
-					// enter glitch shortly after fade
-					glitchModeActive = true;
-					showNotification('Your vision fractures...', 1600);
-					if (typeof enterGlitchReality === 'function') enterGlitchReality('fade');
-					// keep the fade for a moment
-				}, 1200);
-			}
-			/* A simple stub you can override to switch to your glitch level (called after outcomes) */
-			function enterGlitchReality(mode) {
-				// mode = 'instant' | 'explosion' | 'fade'
-				// Default behavior: set a flag and show a notification. Replace with your own level load.
-				glitchModeActive = true;
-				console.log('Entering Glitch Reality. Mode:', mode);
-				// Example: change palette and reduce controls
-				canvas.style.filter = 'invert(0.9) hue-rotate(200deg) saturate(40%)';
-				showNotification('Glitch Reality Mode unlocked!', 2000);
-				// You might want to set a variable so other systems change behavior:
-				window.isGlitchReality = true;
-				// Stop background music (if desired)
-				if (backgroundMusic && !backgroundMusic.paused) {
-					try {
-						backgroundMusic.pause();
-					} catch (e) {}
-				}
-				// Optionally teleport player to a starting glitch coordinate:
-				player.x = canvas.width / 2;
-				player.y = platform.y - player.height - 10;
-				// (Further glitch-level initialization goes here)
-			}
-			/* Hook to draw markers inside the main draw loop - call drawHallwayMarkers(ctx) each frame */
-			const originalDrawPlayer = drawPlayer;
-			drawPlayer = function() {
-				// draw player normally
-				originalDrawPlayer();
-				// draw markers on top using ctx
-				try {
-					drawHallwayMarkers(ctx);
-				} catch (e) {}
-			};
+/* Helper to create terminal "world" positions relative to hallway spawn */
+function setupHallwayTerminals() {
+  // Define three terminal x offsets from the hallway spawn (player start in hallway)
+  const spawnX = canvas.width / 2; // hallway spawn used earlier
+  hallwayTerminals = [
+    { id: 't1', x: spawnX - 300, found: false, title: 'LOG 1', content: 'First code digit: 3' },
+    { id: 't2', x: spawnX + 0,   found: false, title: 'LOG 2', content: 'Second code digit: 7' },
+    { id: 't3', x: spawnX + 300, found: false, title: 'LOG 3', content: 'Last digit: 5' }
+  ];
+  // console sits further down the hallway
+  consoleSpawnX = spawnX + 700;
+  logsFoundCount = 0;
+  consoleActive = false;
+  consoleOpened = false;
+}
+
+/* small HUD marker: draw terminal markers when in hallway (optional visual aid) */
+function drawHallwayMarkers(ctxRef) {
+  if (objectivePhase !== 'hallway') return;
+  ctxRef.save();
+  hallwayTerminals.forEach(t => {
+    if (!t.found) {
+      ctxRef.fillStyle = 'rgba(180,255,255,0.08)';
+      ctxRef.fillRect(t.x - player.x + player.x + player.width/2 - 8, platform.y - 80, 16, 40);
+      ctxRef.fillStyle = '#66ddff';
+      ctxRef.font = '10px monospace';
+      const labelX = (t.x - player.x) + player.x + player.width/2 - 12;
+      ctxRef.fillText('TERM', labelX, platform.y - 50);
+    }
+  });
+  // console marker
+  if (!consoleActive) {
+    // don't draw until logs found
+  } else if (!consoleOpened) {
+    ctxRef.fillStyle = 'rgba(255,200,150,0.06)';
+    ctxRef.fillRect(consoleSpawnX - player.x + player.x + player.width/2 - 12, platform.y - 90, 24, 52);
+    ctxRef.fillStyle = '#ffcc66';
+    ctxRef.font = '10px monospace';
+    const labelX = (consoleSpawnX - player.x) + player.x + player.width/2 - 16;
+    ctxRef.fillText('CON', labelX, platform.y - 55);
+  }
+  ctxRef.restore();
+}
+
+/* Replace enterHallway() */
+function enterHallway() {
+  // Mark objective
+  objectivePhase = 'hallway';
+  setObjective('Objective: Find the override logs in the hallway. (0/3)');
+  showNotification('Entering hallway.', 1600);
+  highlightDoor(false);
+  // visually transition to hallway
+  hallwayOverlay.style.display = 'block';
+  setTimeout(() => {
+    hideWorldUI();
+    player.x = canvas.width / 2;
+    player.y = canvas.height / 2 - 30;
+    canvas.style.background = '#222';
+    setupHallwayTerminals(); // spawn terminals positions & console location
+    setTimeout(() => {
+      hallwayOverlay.style.display = 'none';
+      if (!dialogueShown) {
+        dialogueShown = true;
+        showHallwayDialogueSequence();
+      }
+    }, 1200);
+  }, 600);
+}
+
+/* show Hallway dialogue (replaces existing) */
+function showHallwayDialogueSequence() {
+  // Dave's urgent line then the choices that lead to the log objective (preserves previous choices)
+  showDialogue("Dave (Supervisor):", "You there! The Rift’s destabilizing, automated systems are down. We need a manual override, NOW!", () => {
+    const choices = [
+      {
+        label: "What's happening? I just got here!",
+        onSelect: () => {
+          showDialogue("Player:", "What's happening? I just got here!", () => {
+            showDialogue("Dave (Supervisor):", "The Rift's field is fluctuating — spatial stability nodes are tripping. If it collapses it'll tear the lab apart. We need to trace its source in the logs and perform a manual override.", () => {
+              setObjective('Objective: Search for terminal logs (0/3).');
+              showNotification('Objective Updated: Search for terminal logs', 2800);
+              setTimeout(() => {
+                showNotification('Hint: Move near a terminal and press E to interact.', 3500);
+              }, 500);
+              showDialogue("Dave (Supervisor):", "Head to the terminals — check the logs and follow the instructions.", () => {
+                const contChoices = [{ label: "Understood", onSelect: () => hideDialogueBox() }];
+                showChoices(contChoices);
+              });
+            });
+          });
+        }
+      },
+      {
+        label: "How do I fix it?",
+        onSelect: () => {
+          showDialogue("Player:", "How do I fix it?", () => {
+            showDialogue("Dave (Supervisor):", "Start with the terminal logs. They should show the anomaly's origin and the correct override steps. Get me the logs and I'll talk you through it.", () => {
+              setObjective('Objective: Search for terminal logs (0/3).');
+              showNotification('Objective Updated: Search for terminal logs', 2800);
+              const contChoices = [{ label: "On my way", onSelect: () => hideDialogueBox() }];
+              showChoices(contChoices);
+            });
+          });
+        }
+      },
+      {
+        label: "Can't we just shut it off?",
+        onSelect: () => {
+          showDialogue("Player:", "Can't we just shut it off?", () => {
+            showDialogue("Dave (Supervisor):", "If only it were that easy. Power cycling without the logs risks an uncontrolled collapse. We need a manual override keyed to the logs.", () => {
+              setObjective('Objective: Search for terminal logs (0/3).');
+              showNotification('Objective Updated: Search for terminal logs', 2800);
+              const contChoices = [{ label: "Alright", onSelect: () => hideDialogueBox() }];
+              showChoices(contChoices);
+            });
+          });
+        }
+      }
+    ];
+    showChoices(choices);
+  });
+}
+
+/* Interaction: use 'E' near terminals / console */
+let currentNearbyTerminal = null;
+let nearbyConsole = false;
+
+document.addEventListener("keydown", (e) => {
+  if ((e.key === "e" || e.key === "E") && objectivePhase === 'hallway') {
+    // check proximity to any terminal
+    currentNearbyTerminal = null;
+    nearbyConsole = false;
+    for (let t of hallwayTerminals) {
+      const dx = Math.abs(player.x - t.x);
+      const dy = Math.abs((player.y + player.height) - platform.y);
+      if (dx < 60 && dy < 40 && !t.found) {
+        currentNearbyTerminal = t;
+        break;
+      }
+    }
+    // check console proximity (only after logs found)
+    if (logsFoundCount >= 3 && !consoleOpened) {
+      const dxC = Math.abs(player.x - consoleSpawnX);
+      const dyC = Math.abs((player.y + player.height) - platform.y);
+      if (dxC < 80 && dyC < 50) nearbyConsole = true;
+    }
+
+    if (currentNearbyTerminal) {
+      openTerminal(currentNearbyTerminal.id);
+    } else if (nearbyConsole) {
+      openConsoleUI();
+    } else {
+      showNotification('Nothing to interact with here.', 900);
+    }
+  }
+});
+
+/* Terminal UI logic */
+const terminalUI = document.getElementById('terminalUI');
+const terminalTitle = document.getElementById('terminalTitle');
+const terminalContent = document.getElementById('terminalContent');
+const terminalClose = document.getElementById('terminalClose');
+
+function openTerminal(id) {
+  if (glitchModeActive) return;
+  const t = hallwayTerminals.find(x => x.id === id);
+  if (!t || t.found) return;
+  terminalTitle.textContent = t.title;
+  terminalContent.textContent = t.content;
+  terminalUI.style.display = 'block';
+  // lock gameplay briefly
+  showNotification(`${t.title} accessed`, 1400);
+  // mark as found when closed
+  terminalClose.onclick = () => {
+    terminalUI.style.display = 'none';
+    if (!t.found) {
+      t.found = true;
+      logsFoundCount++;
+      setObjective(`Objective: Find the override logs (${logsFoundCount}/3).`);
+      showNotification(`Log acquired (${logsFoundCount}/3)`, 1400);
+      if (logsFoundCount >= 3) {
+        // activate console
+        consoleActive = true;
+        setObjective('Objective: Return to the Central Console.');
+        showNotification('All logs found. Head to the Central Console!', 2200);
+        // small Dave line trigger
+        showDialogue("Dave (Supervisor):", "Good work! Head to the central override console!", () => {
+          const cont = [{ label: "On my way", onSelect: () => hideDialogueBox() }];
+          showChoices(cont);
+        });
+      }
+    }
+  };
+}
+
+/* Console UI logic */
+const consoleUI = document.getElementById('consoleUI');
+const consoleDialogue = document.getElementById('consoleDialogue');
+const consoleChoices = document.getElementById('consoleChoices');
+const manualInput = document.getElementById('manualCodeInput');
+const manualSubmit = document.getElementById('manualSubmit');
+const consoleCancel = document.getElementById('consoleCancel');
+
+function openConsoleUI() {
+  if (glitchModeActive) return;
+  if (!consoleActive) {
+    showNotification('You need all logs first.', 1500);
+    return;
+  }
+  consoleOpened = true;
+  consoleUI.style.display = 'block';
+  consoleDialogue.textContent = "Dave: This is it! Enter the override code before the Rift destabilizes!";
+  // hook choice buttons
+  document.querySelectorAll('.consoleChoiceBtn').forEach(btn => {
+    btn.onclick = () => {
+      evaluateConsoleEntry(btn.getAttribute('data-val'));
+    };
+  });
+  manualSubmit.onclick = () => {
+    const val = manualInput.value.trim();
+    evaluateConsoleEntry(val);
+  };
+  consoleCancel.onclick = () => {
+    consoleUI.style.display = 'none';
+    showNotification('Console closed.', 900);
+  };
+}
+
+/* Evaluate console entry */
+function evaluateConsoleEntry(val) {
+  if (!val) {
+    showNotification('Enter a code or pick one of the options.', 1400);
+    return;
+  }
+  // normalize
+  const code = String(val).replace(/\s+/g, '');
+  if (code === '375') {
+    // success
+    consoleUI.style.display = 'none';
+    showNotification('Override accepted — stabilizing rift...', 2200);
+    // Dave success line and advance
+    showDialogue("Dave (Supervisor):", "You did it! Welcome to DRT, rookie.", () => {
+      // flag to proceed to next chapter - you'll want to hook this into your level loading
+      // Example: set a variable and call nextChapter()
+      window.nextChapterReady = true;
+      // optionally call a function to proceed; adjust to your project flow
+    });
+  } else {
+    // wrong code -> randomized fail outcome (three types)
+    consoleUI.style.display = 'none';
+    triggerWrongCodeOutcome();
+  }
+}
+
+/* Wrong-code outcomes (randomized among three behaviors) */
+function triggerWrongCodeOutcome() {
+  // small random pick: 40% immediate glitch, 40% explosion cutscene then glitch, 20% fade-to-glitch
+  const r = Math.random();
+  if (r < 0.4) {
+    immediateGlitch();
+  } else if (r < 0.8) {
+    explosionThenGlitch();
+  } else {
+    fadeThenGlitch();
+  }
+}
+
+/* Outcome 1: Immediate glitch (instant distortion + load glitch mode) */
+function immediateGlitch() {
+  showNotification('Code rejected — spatial destabilization!', 1800);
+  // quick visual: apply CSS filter to canvas + add scanline overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'glitchOverlay';
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.pointerEvents = 'none';
+  overlay.style.zIndex = '2000';
+  overlay.style.backdropFilter = 'contrast(120%) saturate(80%)';
+  overlay.style.mixBlendMode = 'screen';
+  overlay.style.background = 'repeating-linear-gradient(180deg, rgba(255,255,255,0.02) 0px, rgba(0,0,0,0.02) 2px)';
+  document.body.appendChild(overlay);
+  // apply a short shake and then enter glitch mode
+  canvas.style.transition = 'filter 0.3s';
+  canvas.style.filter = 'grayscale(0.7) hue-rotate(40deg) contrast(140%)';
+  glitchModeActive = true;
+  // small delay for effect, then fully enable glitch mode state
+  setTimeout(() => {
+    // leave visual glitch running; set a global flag the rest of the game can use
+    showNotification('Pulled into a broken dimension...', 2000);
+    // (Optional) you can call a function to switch to glitch-level behavior here:
+    if (typeof enterGlitchReality === 'function') enterGlitchReality('instant');
+  }, 600);
+}
+
+/* Outcome 2: Explosion cutscene -> glitch */
+function explosionThenGlitch() {
+  // red flash + alarm sound and camera shake
+  showNotification('RIFT OVERLOAD! EVACUATE!', 1800);
+  // flash screen
+  const flash = document.createElement('div');
+  flash.style.position = 'fixed';
+  flash.style.inset = '0';
+  flash.style.background = 'radial-gradient(circle at 50% 40%, rgba(255,120,80,0.95), rgba(0,0,0,0.2))';
+  flash.style.zIndex = '2200';
+  flash.style.pointerEvents = 'none';
+  document.body.appendChild(flash);
+  // optional alarm sound if you want (use existing audio system if present)
+  try {
+    const alarm = new Audio('https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/alien-siren.mp3?v=1743999999999');
+    alarm.volume = 0.9;
+    alarm.play().catch(()=>{});
+    setTimeout(()=>{ alarm.pause(); }, 2100);
+  } catch(e){}
+  // briefly shake canvas
+  const orig = canvas.style.transform || '';
+  canvas.style.transition = 'transform 0.2s';
+  canvas.style.transform = 'translateX(6px) rotate(0.8deg)';
+  setTimeout(()=>{ canvas.style.transform = 'translateX(-6px) rotate(-0.6deg)'; }, 120);
+  setTimeout(()=>{ canvas.style.transform = orig; }, 360);
+  // after dramatic pause, switch to glitch overlay
+  setTimeout(() => {
+    document.body.removeChild(flash);
+    // reuse immediateGlitch visuals
+    immediateGlitch();
+    if (typeof enterGlitchReality === 'function') enterGlitchReality('explosion');
+  }, 900);
+}
+
+/* Outcome 3: Fade to black -> glitch */
+function fadeThenGlitch() {
+  const f = document.createElement('div');
+  f.style.position = 'fixed';
+  f.style.inset = '0';
+  f.style.background = 'black';
+  f.style.opacity = '0';
+  f.style.zIndex = '2300';
+  f.style.transition = 'opacity 0.9s';
+  document.body.appendChild(f);
+  setTimeout(()=>{ f.style.opacity = '1'; }, 20);
+  setTimeout(()=> {
+    // enter glitch shortly after fade
+    glitchModeActive = true;
+    showNotification('Your vision fractures...', 1600);
+    if (typeof enterGlitchReality === 'function') enterGlitchReality('fade');
+    // keep the fade for a moment
+  }, 1200);
+}
+
+/* A simple stub you can override to switch to your glitch level (called after outcomes) */
+function enterGlitchReality(mode) {
+  // mode = 'instant' | 'explosion' | 'fade'
+  // Default behavior: set a flag and show a notification. Replace with your own level load.
+  glitchModeActive = true;
+  console.log('Entering Glitch Reality. Mode:', mode);
+  // Example: change palette and reduce controls
+  canvas.style.filter = 'invert(0.9) hue-rotate(200deg) saturate(40%)';
+  showNotification('Glitch Reality Mode unlocked!', 2000);
+  // You might want to set a variable so other systems change behavior:
+  window.isGlitchReality = true;
+  // Stop background music (if desired)
+  if (backgroundMusic && !backgroundMusic.paused) {
+    try { backgroundMusic.pause(); } catch(e) {}
+  }
+  // Optionally teleport player to a starting glitch coordinate:
+  player.x = canvas.width / 2;
+  player.y = platform.y - player.height - 10;
+  // (Further glitch-level initialization goes here)
+}
+
+/* Hook to draw markers inside the main draw loop - call drawHallwayMarkers(ctx) each frame */
+const originalDrawPlayer = drawPlayer;
+drawPlayer = function() {
+  // draw player normally
+  originalDrawPlayer();
+  // draw markers on top using ctx
+  try {
+    drawHallwayMarkers(ctx);
+  } catch (e) {}
+};
+
+
 			// Hallway dialogue sequence
 			function showHallwayDialogueSequence() {
 				// initial Dave line
 				showDialogue("Dave (Supervisor):", "You there! The Rift’s destabilizing, automated systems are down. We need a manual override, NOW!", () => {
 					// after initial line is typed out, present player choices
-					const choices = [{
-						label: "What's happening? I just got here!",
-						onSelect: () => {
-							// show player's line then Dave's explanation
-							showDialogue("Player:", "What's happening? I just got here!", () => {
-								showDialogue("Dave (Supervisor):", "The Rift's field is fluctuating — spatial stability nodes are tripping. If it collapses it'll tear the lab apart. We need to trace its source in the logs and perform a manual override.", () => {
-									// update objective to search logs and provide short tutorial hint
-									setObjective('Search for terminal logs (tutorial on movement and interaction).');
-									showNotification('Objective Updated: Search for terminal logs', 2800);
-									// small movement/interaction tutorial hint
-									setTimeout(() => {
-										showNotification('Hint: Use Arrow keys or A/D to move. Press E to interact with terminals.', 3500);
-									}, 500);
-									// leave dialogue visible with a continue / close button
-									showDialogue("Dave (Supervisor):", "Head to the terminals — check the logs and follow the instructions.", () => {
-										const contChoices = [{
-											label: "Understood",
-											onSelect: () => hideDialogueBox()
-										}];
+					const choices = [
+						{
+							label: "What's happening? I just got here!",
+							onSelect: () => {
+								// show player's line then Dave's explanation
+								showDialogue("Player:", "What's happening? I just got here!", () => {
+									showDialogue("Dave (Supervisor):", "The Rift's field is fluctuating — spatial stability nodes are tripping. If it collapses it'll tear the lab apart. We need to trace its source in the logs and perform a manual override.", () => {
+										// update objective to search logs and provide short tutorial hint
+										setObjective('Search for terminal logs (tutorial on movement and interaction).');
+										showNotification('Objective Updated: Search for terminal logs', 2800);
+										// small movement/interaction tutorial hint
+										setTimeout(() => {
+											showNotification('Hint: Use Arrow keys or A/D to move. Press E to interact with terminals.', 3500);
+										}, 500);
+										// leave dialogue visible with a continue / close button
+										showDialogue("Dave (Supervisor):", "Head to the terminals — check the logs and follow the instructions.", () => {
+											const contChoices = [{ label: "Understood", onSelect: () => hideDialogueBox() }];
+											showChoices(contChoices);
+										});
+									});
+								});
+							}
+						},
+						{
+							label: "How do I fix it?",
+							onSelect: () => {
+								showDialogue("Player:", "How do I fix it?", () => {
+									showDialogue("Dave (Supervisor):", "Start with the terminal logs. They should show the anomaly's origin and the correct override steps. Get me the logs and I'll talk you through it.", () => {
+										setObjective('Search for terminal logs (tutorial on movement and interaction).');
+										showNotification('Objective Updated: Search for terminal logs', 2800);
+										const contChoices = [{ label: "On my way", onSelect: () => hideDialogueBox() }];
 										showChoices(contChoices);
 									});
 								});
-							});
-						}
-					}, {
-						label: "How do I fix it?",
-						onSelect: () => {
-							showDialogue("Player:", "How do I fix it?", () => {
-								showDialogue("Dave (Supervisor):", "Start with the terminal logs. They should show the anomaly's origin and the correct override steps. Get me the logs and I'll talk you through it.", () => {
-									setObjective('Search for terminal logs (tutorial on movement and interaction).');
-									showNotification('Objective Updated: Search for terminal logs', 2800);
-									const contChoices = [{
-										label: "On my way",
-										onSelect: () => hideDialogueBox()
-									}];
-									showChoices(contChoices);
+							}
+						},
+						{
+							label: "Can't we just shut it off?",
+							onSelect: () => {
+								showDialogue("Player:", "Can't we just shut it off?", () => {
+									showDialogue("Dave (Supervisor):", "If only it were that easy. Power cycling without the logs risks an uncontrolled collapse. We need a manual override keyed to the logs.", () => {
+										setObjective('Search for terminal logs (tutorial on movement and interaction).');
+										showNotification('Objective Updated: Search for terminal logs', 2800);
+										const contChoices = [{ label: "Alright", onSelect: () => hideDialogueBox() }];
+										showChoices(contChoices);
+									});
 								});
-							});
+							}
 						}
-					}, {
-						label: "Can't we just shut it off?",
-						onSelect: () => {
-							showDialogue("Player:", "Can't we just shut it off?", () => {
-								showDialogue("Dave (Supervisor):", "If only it were that easy. Power cycling without the logs risks an uncontrolled collapse. We need a manual override keyed to the logs.", () => {
-									setObjective('Search for terminal logs (tutorial on movement and interaction).');
-									showNotification('Objective Updated: Search for terminal logs', 2800);
-									const contChoices = [{
-										label: "Alright",
-										onSelect: () => hideDialogueBox()
-									}];
-									showChoices(contChoices);
-								});
-							});
-						}
-					}];
+					];
 					showChoices(choices);
 				});
 			}
+
 			// Note: updateHotbarSelection already existed; extend it so hotbar appears if items exist
 			let selectedItem = 1; // Default selected item
 			function updateHotbarSelection() {
@@ -1800,13 +1794,12 @@
 				});
 				// Also ensure hotbar is visible when it has items and toggle allows it
 				let anyItem = false;
-				hotbarItems.forEach(s => {
-					if (s.dataset.item && s.dataset.item !== '') anyItem = true;
-				});
+				hotbarItems.forEach(s => { if (s.dataset.item && s.dataset.item !== '') anyItem = true; });
 				if (anyItem && hotbarToggle && hotbarToggle.checked) {
 					hotbar.style.display = 'flex';
 				}
 			}
+
 			// Rest of existing code (cutscene, game loop, input, etc.)
 			const skipButton = document.getElementById("skipButton");
 			skipButton.addEventListener("click", skipCutscene);
@@ -1816,6 +1809,7 @@
 			const rightClickMenu = document.getElementById("rightClickMenu");
 			const menuRestart = document.getElementById("menuRestart");
 			const menuToggleSound = document.getElementById("menuToggleSound");
+
 			// Sound effect URLs
 			const jumpSFX = new Audio("https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/cartoon-jump-6462%20(1).mp3?v=1743861440466");
 			const walkingSFX = new Audio("https://cdn.glitch.global/786ea774-457c-43de-bae1-f741692bf03d/loud-footsteps-62038-%5BAudioTrimmer.com%5D-%5BAudioTrimmer.com%5D.mp3?v=1743995310590");
@@ -2312,6 +2306,7 @@
 			});
 			// Initial selection
 			updateHotbarSelection();
+
 			// start main loop
 			requestAnimationFrame(gameLoop);
 			window.addEventListener("resize", () => {
@@ -2467,6 +2462,7 @@
 				settingsMenu.style.display = "block";
 				rightClickMenu.style.display = "none";
 			}
+
 			// Ensure objective starts in pickupChest state if cutscene already complete on load
 			if (isCutsceneComplete) {
 				objectivePhase = 'pickupChest';
