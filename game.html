@@ -2583,5 +2583,393 @@
 
     // --- END: ADDITIVE CODE FOR RIFT EXPLOSION SCENARIO ---
 </script>
+<script>
+    /* CHAPTER 2: THE FIRST RIFT 
+      - Handles transition from Chapter 1
+      - Implements Holographic Training Room & Dimension 17
+      - Adds Shooting mechanics & Boss Fight
+    */
+
+    // --- Chapter 2 State Variables ---
+    let chapter2Active = false;
+    let ch2Scene = 'training'; // 'training' or 'dim17'
+    let ch2Timer = 0;
+    let ch2Nodes = [];
+    let ch2Projectiles = [];
+    let ch2Enemy = null;
+    let ch2Victory = false;
+
+    // Configuration for Chapter 2
+    const ch2Config = {
+        gravity: 0.5,
+        floorY: canvas.height - 50,
+        colors: {
+            trainingBg: '#000510',
+            trainingGrid: 'rgba(0, 255, 255, 0.1)',
+            dim17Bg: '#2a0a2a',
+            dim17Plat: '#4a1a4a'
+        }
+    };
+
+    // --- Monitor for Chapter 1 Completion ---
+    const ch1Monitor = setInterval(() => {
+        if (window.nextChapterReady && !chapter2Active) {
+            startChapter2();
+            clearInterval(ch1Monitor);
+        }
+    }, 1000);
+
+    function startChapter2() {
+        console.log("Starting Chapter 2...");
+        chapter2Active = true;
+        
+        // Reset Player Position for Training
+        player.x = 100;
+        player.y = canvas.height - 150;
+        player.dx = 0;
+        player.dy = 0;
+        
+        // Setup Scene 1: Training Room
+        setupTrainingRoom();
+
+        // Override the main Game Loop
+        // We redefine the global gameLoop function so the next RequestAnimationFrame calls OUR loop
+        window.gameLoop = chapter2Loop;
+    }
+
+    // --- Setup Functions ---
+
+    function setupTrainingRoom() {
+        ch2Scene = 'training';
+        showNotification("Simulating: Holographic Training Deck", 3000);
+        
+        // Spawn 3 Holo-Nodes to stabilize
+        ch2Nodes = [
+            { x: 300, y: ch2Config.floorY - 60, active: true, type: 'holo' },
+            { x: 500, y: ch2Config.floorY - 60, active: true, type: 'holo' },
+            { x: 700, y: ch2Config.floorY - 140, active: true, type: 'holo' } // A bit higher
+        ];
+
+        // Trigger Dialogue
+        setTimeout(() => {
+            showDialogue("Dave (Supervisor)", "Welcome to the Sim Deck, Kai. Before we throw you into the deep end, let's verify your gear.", () => {
+                showDialogue("Dave (Supervisor)", "I've unlocked the Rift Tools in your hotbar. Use the Stabilizer on those holographic nodes. Remember, a single miscalculation in the field, and we're all cosmic dust.", () => {
+                   setObjective("Objective: Stabilize the 3 Holographic Nodes (Press E).");
+                });
+            });
+        }, 1000);
+    }
+
+    function setupDimension17() {
+        ch2Scene = 'dim17';
+        
+        // Teleport Player
+        player.x = 50;
+        player.y = 0;
+        
+        // Visual Transition
+        showNotification("WARPING TO DIMENSION 17...", 3000);
+        
+        // Spawn Real Rift Nodes
+        ch2Nodes = [
+            { x: 250, y: ch2Config.floorY - 80, active: true, type: 'real' },
+            { x: 550, y: ch2Config.floorY - 150, active: true, type: 'real' }, // Floating height
+            { x: 850, y: ch2Config.floorY - 80, active: true, type: 'real' }
+        ];
+
+        // Dialogue
+        setTimeout(() => {
+            showDialogue("Dave (Supervisor)", "Telemetry looks... bad. The sky is purple. That's never good.", () => {
+                showDialogue("Dave (Supervisor)", "You're in Dimension 17. The terrain is glitchy. Stabilize 3 Rift Points before this reality collapses.", () => {
+                    setObjective("Objective: Stabilize 3 Rift Points in Dimension 17.");
+                });
+            });
+        }, 1500);
+    }
+
+    function spawnRogueEntity() {
+        showNotification("WARNING: RIFT ENTITY DETECTED", 4000);
+        
+        // Spawn Enemy
+        ch2Enemy = {
+            x: canvas.width - 100,
+            y: ch2Config.floorY - 100,
+            width: 60,
+            height: 80,
+            hp: 100,
+            maxHp: 100,
+            speed: 2,
+            active: true,
+            color: '#ff00ff'
+        };
+
+        // Dialogue Twist
+        showDialogue("Dave (Supervisor)", "Wait! Energy spike! It's a Rogue Rift Entity—residue from a failed stabilization!", () => {
+             showDialogue("System", "Combat Mode Engaged. Equip Pistol (Hotbar) and Fire (F Key or Click).", () => {
+                setObjective("Objective: Defeat the Rogue Rift Entity!");
+                // Auto-equip gun for the player if not equipped
+                player.equipped = 'Gun';
+                showNotification("Pistol Equipped. Press F to Shoot.", 3000);
+             });
+        });
+    }
+
+    // --- Core Chapter 2 Game Loop ---
+
+    function chapter2Loop(timestamp) {
+        if (gamePaused) return;
+
+        const ctx = canvas.getContext("2d");
+        
+        // 1. Draw Backgrounds
+        if (ch2Scene === 'training') {
+            // Holographic Grid
+            ctx.fillStyle = ch2Config.colors.trainingBg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawGrid(ctx, ch2Config.colors.trainingGrid);
+        } else {
+            // Dimension 17 Purple Sky
+            ctx.fillStyle = ch2Config.colors.dim17Bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Glitch effect on background
+            if (Math.random() > 0.95) {
+                ctx.fillStyle = '#3a1a3a';
+                ctx.fillRect(Math.random() * canvas.width, 0, 50, canvas.height);
+            }
+        }
+
+        // 2. Physics & Movement (Re-using basic logic for consistency)
+        updatePlayerPhysics();
+
+        // 3. Draw Floor
+        ctx.fillStyle = (ch2Scene === 'training') ? '#003344' : ch2Config.colors.dim17Plat;
+        ctx.fillRect(0, ch2Config.floorY, canvas.width, 50);
+
+        // 4. Object Logic (Nodes)
+        updateAndDrawNodes(ctx);
+
+        // 5. Enemy Logic
+        if (ch2Enemy && ch2Enemy.active) {
+            updateAndDrawEnemy(ctx);
+        }
+
+        // 6. Projectile Logic
+        updateAndDrawProjectiles(ctx);
+
+        // 7. Draw Player
+        drawPlayer(); // Calls original function
+
+        // 8. HUD
+        drawHUD(); // Calls original function
+        
+        // Keep loop running
+        requestAnimationFrame(chapter2Loop);
+    }
+
+    // --- Helper Logic ---
+
+    function drawGrid(ctx, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        const gridSize = 50;
+        // Vertical lines
+        for (let x = 0; x < canvas.width; x += gridSize) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        // Horizontal lines
+        for (let y = 0; y < canvas.height; y += gridSize) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+    }
+
+    function updatePlayerPhysics() {
+        // Reuse keys from main script
+        player.dy += player.gravity;
+        
+        // Horizontal
+        if (keys.left) player.x -= player.speed;
+        if (keys.right) player.x += player.speed;
+
+        // Jump
+        if (keys.space && !player.isJumping && player.onGround) {
+            player.dy = player.jumpStrength;
+            player.isJumping = true;
+            player.onGround = false;
+        }
+
+        player.y += player.dy;
+
+        // Floor Collision
+        if (player.y + player.height > ch2Config.floorY) {
+            player.y = ch2Config.floorY - player.height;
+            player.dy = 0;
+            player.isJumping = false;
+            player.onGround = true;
+        }
+
+        // Screen Boundaries
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    }
+
+    function updateAndDrawNodes(ctx) {
+        let activeCount = 0;
+        ch2Nodes.forEach(node => {
+            if (!node.active) return;
+            activeCount++;
+
+            // Draw Node
+            ctx.save();
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = (ch2Scene === 'training') ? 'cyan' : 'purple';
+            ctx.fillStyle = (ch2Scene === 'training') ? '#00ccff' : '#ff00ff';
+            
+            // Pulsing effect
+            const scale = 1 + Math.sin(Date.now() / 200) * 0.1;
+            const w = 30 * scale;
+            const h = 30 * scale;
+            
+            ctx.translate(node.x, node.y);
+            ctx.rotate(Date.now() / 1000);
+            ctx.fillRect(-w/2, -h/2, w, h);
+            ctx.restore();
+
+            // Interaction Check (Press E)
+            const dist = Math.abs(player.x - node.x) + Math.abs(player.y - node.y);
+            if (dist < 80) {
+                ctx.fillStyle = "white";
+                ctx.font = "12px monospace";
+                ctx.fillText("Press E to Stabilize", node.x - 60, node.y - 40);
+            }
+        });
+
+        // Check for all cleared
+        if (activeCount === 0 && ch2Nodes.length > 0) {
+            if (ch2Scene === 'training') {
+                ch2Nodes = []; // Clear array so this doesn't trigger again
+                showNotification("Training Complete!", 2000);
+                setTimeout(setupDimension17, 2000);
+            } else if (ch2Scene === 'dim17' && !ch2Enemy && !ch2Victory) {
+                // All nodes fixed in Dim 17 -> Spawn Boss
+                ch2Nodes = [];
+                spawnRogueEntity();
+            }
+        }
+    }
+
+    // Input Listener for Interaction (E) and Shooting (F)
+    document.addEventListener("keydown", (e) => {
+        if (!chapter2Active) return;
+
+        // Interaction
+        if (e.key === 'e' || e.key === 'E') {
+            ch2Nodes.forEach(node => {
+                if (!node.active) return;
+                const dist = Math.abs(player.x - node.x) + Math.abs(player.y - node.y);
+                if (dist < 80) {
+                    node.active = false; // Stabilized
+                    showNotification("Rift Point Stabilized", 1000);
+                    // SFX could go here
+                }
+            });
+        }
+
+        // Shooting (F key)
+        if (e.key === 'f' || e.key === 'F') {
+            fireProjectile();
+        }
+    });
+
+    // Mouse click shooting
+    document.addEventListener("mousedown", () => {
+        if (chapter2Active) fireProjectile();
+    });
+
+    function fireProjectile() {
+        // Simple cooldown or limit could go here
+        const bulletSpeed = 10;
+        const direction = (keys.left && !keys.right) ? -1 : 1; // Shoot in facing direction (simple approximation)
+        
+        ch2Projectiles.push({
+            x: player.x + player.width/2,
+            y: player.y + player.height/2,
+            dx: direction * bulletSpeed,
+            life: 60
+        });
+    }
+
+    function updateAndDrawProjectiles(ctx) {
+        ctx.fillStyle = "yellow";
+        for (let i = ch2Projectiles.length - 1; i >= 0; i--) {
+            let p = ch2Projectiles[i];
+            p.x += p.dx;
+            p.life--;
+            
+            ctx.fillRect(p.x, p.y, 8, 4);
+
+            // Enemy Collision
+            if (ch2Enemy && ch2Enemy.active) {
+                if (p.x > ch2Enemy.x && p.x < ch2Enemy.x + ch2Enemy.width &&
+                    p.y > ch2Enemy.y && p.y < ch2Enemy.y + ch2Enemy.height) {
+                    
+                    // Hit!
+                    ch2Enemy.hp -= 10;
+                    ch2Projectiles.splice(i, 1); // Remove bullet
+                    
+                    // Visual feedback
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'lighter';
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(ch2Enemy.x, ch2Enemy.y, ch2Enemy.width, ch2Enemy.height);
+                    ctx.restore();
+
+                    if (ch2Enemy.hp <= 0) {
+                        killEnemy();
+                    }
+                    continue;
+                }
+            }
+
+            if (p.life <= 0) ch2Projectiles.splice(i, 1);
+        }
+    }
+
+    function updateAndDrawEnemy(ctx) {
+        // AI: Float towards player slowly
+        if (player.x < ch2Enemy.x) ch2Enemy.x -= ch2Enemy.speed;
+        else ch2Enemy.x += ch2Enemy.speed;
+
+        // Draw Enemy
+        ctx.fillStyle = ch2Enemy.color;
+        // Glitchy rectangle
+        const jitterX = Math.random() * 4 - 2;
+        const jitterY = Math.random() * 4 - 2;
+        ctx.fillRect(ch2Enemy.x + jitterX, ch2Enemy.y + jitterY, ch2Enemy.width, ch2Enemy.height);
+
+        // Health bar
+        ctx.fillStyle = 'red';
+        ctx.fillRect(ch2Enemy.x, ch2Enemy.y - 15, ch2Enemy.width, 5);
+        ctx.fillStyle = 'green';
+        ctx.fillRect(ch2Enemy.x, ch2Enemy.y - 15, ch2Enemy.width * (ch2Enemy.hp / ch2Enemy.maxHp), 5);
+    }
+
+    function killEnemy() {
+        ch2Enemy.active = false;
+        ch2Victory = true;
+        showNotification("ENTITY DESTROYED", 3000);
+
+        // Drop Data Fragment
+        setTimeout(() => {
+            showDialogue("System", "Anomaly Neutralized. Recovered Encrypted Data Fragment.", () => {
+                showDialogue("Dave (Supervisor)", "Good shooting, Kai. But that thing... it had DRT energy signatures. Secure that fragment. We need to talk when you get back.", () => {
+                    setObjective("CHAPTER 2 COMPLETE. Data Fragment Secured.");
+                    showNotification("CHAPTER 2 COMPLETE", 5000);
+                });
+            });
+        }, 1000);
+    }
+
+</script>
+
 	</body>
 </html>
